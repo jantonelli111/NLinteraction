@@ -19,5 +19,8 @@ Suggests:
 VignetteBuilder: knitr
 Imports: 
     mvtnorm,
-    statmod,
-    truncnorm
+    truncnorm,
+    maps,
+    spam,
+    fields,
+    splines
