@@ -27,7 +27,7 @@ TrueH = function(X) {
 
 Y = 5 + C + TrueH(X) + rnorm(n)
 
-NLmod = NLint(Y=Y, X=X, C=C, nIter=20, nBurn=10, thin=2, nChains=2)
+NLmod = NLint(Y=Y, X=X, C=C, nIter=1000, nBurn=500, thin=2, nChains=2)
 
 ## Print posterior inclusion probabilities
 NLmod$MainPIP
