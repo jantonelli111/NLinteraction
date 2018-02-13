@@ -35,3 +35,8 @@ NLmod$MainPIP
 ## Show the two way interaction probability matrix
 NLmod$InteractionPIP
 ```
+
+
+**References**
+
+Joseph Antonelli, Maitreyi Mazumdar, David Bellinger, David C. Christiani, Robert Wright, Brent A. Coull. **Bayesian variable selection for multi-dimensional semiparametric regression models**. 2018. arXiv:1711.11239
