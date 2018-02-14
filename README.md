@@ -104,8 +104,26 @@ Which shows that the posterior inclusion probability of a three-way interaction 
 
 ### Visualizing exposure response surfaces
 
-Now that we know which exposures are important for predicting the outcome, we can visualize the associations that our model has identified. There are a number of plotting techniques to do this built into the function and we detail them here. 
+Now that we know which exposures are important for predicting the outcome, we can visualize the associations that our model has identified. There are a number of plotting techniques to do this built into the function and we detail them here. The first function plots 1-dimensional exposure response curves between an exposure of interest and the outcome, while fixing the values of the other exposures. Specifically, the function allows the user to fix the value of one exposure at a given quantile, while the remaining exposures are fixed to a different specific quantile. The reason for doing this is that we might want to see how these curves change as a function of another exposure, if two exposures are interacting. In our example there is an interaction between X4 and X5, so we will plot X4's relationship with the outcome, but at different levels of X5, while fixing the values of the remaining exposures.
 
+```
+par(mfrow=c(1,3), pty='s')
+plotSurface1d(NLmod = NLmod, X=X, C=C, j1=4, j2=5,
+              gridLength=30, quantile_j2=0.2, quantile_rest = 0.5,
+              xlab="X4", ylab="Posterior predictive distribution",
+              main="20th quantile of X5")
+plotSurface1d(NLmod = NLmod, X=X, C=C, j1=4, j2=5,
+              gridLength=30, quantile_j2=0.5, quantile_rest = 0.5,
+              xlab="X4", ylab="Posterior predictive distribution",
+              main="50th quantile of X5")
+plotSurface1d(NLmod = NLmod, X=X, C=C, j1=4, j2=5,
+              gridLength=30, quantile_j2=0.8, quantile_rest = 0.5,
+              xlab="X4", ylab="Posterior predictive distribution",
+              main="80th quantile of X5")
+
+```
+
+![Alt text](images/plot7.png)
 
 **References**
 
