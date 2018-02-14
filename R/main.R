@@ -149,3 +149,69 @@ NLint = function(Y=Y, X=X, C=C, nChains = 2, nIter = 10000,
            k = k)
   return(l)
 }
+
+
+
+
+
+
+
+#' Estimate nonlinear association and identify interactions
+#' 
+#' This function takes in the observed data (y, x, c) and estimates
+#' a potentially nonlinear, interactive effect between x and y while
+#' adjusting for c linearly
+#'
+#' @param NLmod              The fitted NLint object
+#' @param Xsub               The exposures for which you want to evaluate whether there is an interaction
+#'
+#' @return A number indicating the posterior probability that the exposures in Xsub are jointly interacting together.
+#'         If Xsub is a scalar then the marginal posterior inclusion probability is returned, while if Xsub is a vector
+#'         of length 2, the two way interaction is returned and so on.
+#'         
+#'
+#' @export
+#' @examples
+#'
+#' n = 200
+#' p = 10
+#' pc = 1
+#' 
+#' sigma = matrix(0.3, p, p)
+#' diag(sigma) = 1
+#' X = rmvnorm(n, mean=rep(0,p), sigma = sigma)
+#' 
+#' C = matrix(rnorm(n*pc), nrow=n)
+#' 
+#' TrueH = function(X) {
+#'   return(0.5*(X[,2]*X[,3]) - 0.6*(X[,4]^2 * X[,5]))
+#' }
+#' 
+#' Y = 5 + C + TrueH(X) + rnorm(n)
+#' 
+#' NLmod = NLint(Y=Y, X=X, C=C)
+#' 
+#' ## Find 2 way interaction probability between exposure 4 and 5
+#' InteractionProb(NLmod=NLmod, Xsub=c(4,5))
+
+
+InteractionProb = function(NLmod, Xsub) {
+  zeta = NLmod$posterior$zeta
+  nChains = dim(zeta)[1]
+  totalScans = dim(zeta)[2]
+  p = dim(zeta)[3]
+  k = dim(zeta)[4]
+  
+  intMat = matrix(NA, totalScans, nChains)
+  for (ni in 1 : totalScans) {
+    for (nc in 1 : nChains) {
+      int_ind = 0
+      for (h in 1 : k) {
+        if (all(zeta[nc,ni,Xsub,h] == rep(1, length(Xsub)))) int_ind = 1
+      }
+      intMat[ni,nc] = int_ind
+    }
+  }
+  return(mean(intMat))
+}
+

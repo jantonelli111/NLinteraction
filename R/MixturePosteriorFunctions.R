@@ -368,7 +368,6 @@ InteractionMatrix = function(zetaPost, totalScans, nChains, p, k) {
 }
 
 
-
 InclusionVector = function(zetaPost, totalScans, nChains, p, k) {
   inclusionArray = array(NA, c(nChains, totalScans, p))
   for (ni in 1 : totalScans) {
