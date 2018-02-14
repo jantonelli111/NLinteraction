@@ -114,8 +114,9 @@ WaicMixture = function(Xstar, designC, totalScans, nChains, zetaPost,
 
 PlotInteraction = function(j1, j2, X, Xstar, C, quantile_j2, quantile_rest, 
                                   ns, gridLength, p, zetaPost, betaList, 
-                                  betaCPost, totalScans, nChains, k, ylim=NULL,
-                           xlab="", ylab="", main="") {
+                                  betaCPost, totalScans, nChains, k,...) {
+
+  n = dim(X)[1]
   NewDesignMat = matrix(NA, gridLength, p)
   for (j in 1 : p) {
     NewDesignMat[,j] = quantile(X[,j], quantile_rest)
@@ -144,15 +145,15 @@ PlotInteraction = function(j1, j2, X, Xstar, C, quantile_j2, quantile_rest,
   predictions = PredictionsMixture(XstarOld = Xstar, XstarNew = NewDesign, designC = NewDesignC, 
                                    totalScans = totalScans, nChains = nChains,
                                    zetaPost = zetaPost, 
-                                   betaList = betaList, betaCPost = betaCPost, k=k)
+                                   betaList = betaList, betaCPost = betaCPost, k=k, ns=ns)
   
-  if (is.null(ylim) == TRUE) {
-    plot(NewDesignMat[,j1], apply(predictions$PredictedPost, 3, mean), type='l', lwd=3, 
-         ylim=range(c(apply(predictions$PredictedPost, 3, quantile, c(.025, .975)))),
-         xlab = xlab, ylab=ylab, main=main)
+
+  dots = list(...)
+  if ("ylim" %in% ls(dots)) {
+    plot(NewDesignMat[,j1], apply(predictions$PredictedPost, 3, mean), type='l', lwd=3,...)
   } else {
-    plot(NewDesignMat[,j1], apply(predictions$PredictedPost, 3, mean), type='l', lwd=3, 
-         ylim=ylim,xlab = xlab, ylab=ylab, main=main)
+    plot(NewDesignMat[,j1], apply(predictions$PredictedPost, 3, mean), type='l', lwd=3,
+         ylim=range(c(apply(predictions$PredictedPost, 3, quantile, c(.025, .975)))),...)
   }
   
   polygon(x = c(NewDesignMat[,j1], rev(NewDesignMat[,j1])), 
@@ -166,12 +167,9 @@ PlotInteraction = function(j1, j2, X, Xstar, C, quantile_j2, quantile_rest,
 ## Function to plot heatmap between 2 variables conditional on third    ##
 ##########################################################################
 
-PlotInteractionHeatmap = function(j1, j2, grid_j1, grid_j2, Xstar, X, C, quantile_j3, quantile_rest, 
-                                  ns, p, zetaPost, betaList, 
-                                  betaCPost, totalScans, nChains, k,
-                                  xlab="", ylab="", main="") {
-  
-  library(fields)
+PlotInteractionHeatmapMeanSD = function(j1, j2, grid_j1, grid_j2, Xstar, X, C, quantile_j3, quantile_rest, 
+                                  ns, p, zetaPost, betaList, minDist=Inf,
+                                  betaCPost, totalScans, nChains, k,...) {
   
   colors = colorRampPalette(c("blue", "green", "red"))
   
@@ -204,7 +202,7 @@ PlotInteractionHeatmap = function(j1, j2, grid_j1, grid_j2, Xstar, X, C, quantil
   predictions = PredictionsMixture(XstarOld = Xstar, XstarNew = NewDesign, designC = NewDesignC, 
                                    totalScans = totalScans, nChains = nChains,
                                    zetaPost = zetaPost, 
-                                   betaList = betaList, betaCPost = betaCPost, k=k)
+                                   betaList = betaList, betaCPost = betaCPost, k=k, ns=ns)
   
   ## for plotting we need to turn predicted values into matrix
   NewPredictedPostMat = array(NA, dim=c(nChains, totalScans, length(grid_j1), length(grid_j2)))
@@ -214,7 +212,7 @@ PlotInteractionHeatmap = function(j1, j2, grid_j1, grid_j2, Xstar, X, C, quantil
       dist2 = grid_j2[j] - X[,j2]
       dist = sqrt(dist1^2 + dist2^2)
       
-      if (min(dist) > 0.5) {
+      if (min(dist) > minDist) {
         NewPredictedPostMat[,,i,j] = NA
       } else {
         wTemp = which(ij_grid[,1] == i & ij_grid[,2] == j)
@@ -223,19 +221,17 @@ PlotInteractionHeatmap = function(j1, j2, grid_j1, grid_j2, Xstar, X, C, quantil
     }
   }
 
-  image.plot(grid_j1, grid_j2, apply(NewPredictedPostMat, 3:4, mean, na.rm=TRUE),
-             xlab=xlab, ylab=ylab, main=main, 
-             breaks=c(-1.4,seq(-1.3, 0.6, length=63), 0.7), col=tim.colors())
+  par(mfrow=c(1,2), pty='s')
+  fields::image.plot(grid_j1, grid_j2, apply(NewPredictedPostMat, 3:4, mean, na.rm=TRUE),...)  
+  fields::image.plot(grid_j1, grid_j2, apply(NewPredictedPostMat, 3:4, sd, na.rm=TRUE),...)  
 }
 
-##########################################################################
-## Function to plot SD heatmap between 2 variables conditional on third    ##
-##########################################################################
-
-PlotInteractionHeatmapSD = function(j1, j2, grid_j1, grid_j2, Xstar, X, C, quantile_j3, quantile_rest, 
-                                  ns, p, zetaPost, betaList, 
-                                  betaCPost, totalScans, nChains, k,
-                                  xlab="", ylab="", main="") {
+PlotInteractionHeatmapMean = function(j1, j2, grid_j1, grid_j2, Xstar, X, C, quantile_j3, quantile_rest, 
+                                        ns, p, zetaPost, betaList, minDist=Inf,
+                                        betaCPost, totalScans, nChains, k,...) {
+  
+  colors = colorRampPalette(c("blue", "green", "red"))
+  
   NewDesignMat = matrix(NA, length(grid_j1)*length(grid_j2), p)
   for (j in 1 : p) {
     NewDesignMat[,j] = quantile(X[,j], quantile_rest)
@@ -265,7 +261,7 @@ PlotInteractionHeatmapSD = function(j1, j2, grid_j1, grid_j2, Xstar, X, C, quant
   predictions = PredictionsMixture(XstarOld = Xstar, XstarNew = NewDesign, designC = NewDesignC, 
                                    totalScans = totalScans, nChains = nChains,
                                    zetaPost = zetaPost, 
-                                   betaList = betaList, betaCPost = betaCPost, k=k)
+                                   betaList = betaList, betaCPost = betaCPost, k=k, ns=ns)
   
   ## for plotting we need to turn predicted values into matrix
   NewPredictedPostMat = array(NA, dim=c(nChains, totalScans, length(grid_j1), length(grid_j2)))
@@ -275,7 +271,7 @@ PlotInteractionHeatmapSD = function(j1, j2, grid_j1, grid_j2, Xstar, X, C, quant
       dist2 = grid_j2[j] - X[,j2]
       dist = sqrt(dist1^2 + dist2^2)
       
-      if (min(dist) > 0.5) {
+      if (min(dist) > minDist) {
         NewPredictedPostMat[,,i,j] = NA
       } else {
         wTemp = which(ij_grid[,1] == i & ij_grid[,2] == j)
@@ -284,10 +280,66 @@ PlotInteractionHeatmapSD = function(j1, j2, grid_j1, grid_j2, Xstar, X, C, quant
     }
   }
   
-  image.plot(grid_j1, grid_j2, apply(NewPredictedPostMat, 3:4, sd, na.rm=TRUE),
-             xlab=xlab, ylab=ylab, main=main, 
-             breaks=c(0.1,seq(0.15, 0.75, length=63),0.8), col=tim.colors())
+  fields::image.plot(grid_j1, grid_j2, apply(NewPredictedPostMat, 3:4, mean, na.rm=TRUE),...)  
 }
+
+PlotInteractionHeatmapSD = function(j1, j2, grid_j1, grid_j2, Xstar, X, C, quantile_j3, quantile_rest, 
+                                        ns, p, zetaPost, betaList, minDist=Inf,
+                                        betaCPost, totalScans, nChains, k,...) {
+  
+  colors = colorRampPalette(c("blue", "green", "red"))
+  
+  NewDesignMat = matrix(NA, length(grid_j1)*length(grid_j2), p)
+  for (j in 1 : p) {
+    NewDesignMat[,j] = quantile(X[,j], quantile_rest)
+  }
+  
+  ij_grid = expand.grid(1:length(grid_j1), 1:length(grid_j2))
+  
+  NewDesignMat[,j1] = grid_j1[ij_grid[,1]]
+  NewDesignMat[,j2] = grid_j2[ij_grid[,2]]
+  
+  
+  NewDesign = array(NA, dim=c(length(grid_j1)*length(grid_j2),p,ns+1))
+  NewDesign[,,1] = 1
+  for (j in 1 : p) {
+    temp_ns_object = splines::ns(X[,j], df=ns)
+    temp_sds = apply(temp_ns_object, 2, sd)
+    temp_means = apply(temp_ns_object, 2, mean)
+    NewDesign[,j,2:(ns+1)] = t((t(predict(temp_ns_object, NewDesignMat[,j])) - temp_means) / temp_sds)
+  }
+  
+  NewDesignC = matrix(NA, length(grid_j1)*length(grid_j2), pc+1)
+  NewDesignC[,1] = 1
+  for (jc in 1 : pc) {
+    NewDesignC[,jc+1] = mean(C[,jc])
+  }
+  
+  predictions = PredictionsMixture(XstarOld = Xstar, XstarNew = NewDesign, designC = NewDesignC, 
+                                   totalScans = totalScans, nChains = nChains,
+                                   zetaPost = zetaPost, 
+                                   betaList = betaList, betaCPost = betaCPost, k=k, ns=ns)
+  
+  ## for plotting we need to turn predicted values into matrix
+  NewPredictedPostMat = array(NA, dim=c(nChains, totalScans, length(grid_j1), length(grid_j2)))
+  for (i in 1 : length(grid_j1)) {
+    for (j in 1 : length(grid_j2)) {
+      dist1 = grid_j1[i] - X[,j1]
+      dist2 = grid_j2[j] - X[,j2]
+      dist = sqrt(dist1^2 + dist2^2)
+      
+      if (min(dist) > minDist) {
+        NewPredictedPostMat[,,i,j] = NA
+      } else {
+        wTemp = which(ij_grid[,1] == i & ij_grid[,2] == j)
+        NewPredictedPostMat[,,i,j] = predictions$PredictedPost[,,wTemp] 
+      }
+    }
+  }
+  
+  fields::image.plot(grid_j1, grid_j2, apply(NewPredictedPostMat, 3:4, sd, na.rm=TRUE),...)  
+}
+
 
 
 ##########################################################

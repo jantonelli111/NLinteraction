@@ -12,7 +12,6 @@ URL: https://github.com/jantonelli111/NLinteraction
 BugReports: https://github.com/jantonelli111/NLinteraction/issues
 RoxygenNote: 5.0.1
 Suggests: 
-    ggplot2,
     knitr,
     rmarkdown,
     testthat
@@ -23,4 +22,6 @@ Imports:
     maps,
     spam,
     fields,
-    splines
+    splines,
+    ggplot2,
+    reshape2

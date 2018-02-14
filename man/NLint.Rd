@@ -54,7 +54,10 @@ too small}
 \item{nScans}{The number of MCMC scans to run.}
 }
 \value{
-A list of values
+A list containing the full posterior draws of all parameters in the model, 
+        the waic associated with the model, the posterior inclusion probabilities (PIPs)
+        for each exposure entering into the model, and the matrix of 2-way interaction
+        probabilities
 }
 \description{
 This function takes in the observed data (y, x, c) and estimates

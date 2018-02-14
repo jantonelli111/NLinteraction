@@ -40,7 +40,11 @@
 #'                       calculated if the "EB" option is selected, as it is used to make sure the empirical Bayes variance isn't
 #'                       too small                                                                                                                                                                                             
 #'
-#' @return A list of values
+#' @return A list containing the full posterior draws of all parameters in the model, 
+#'         the waic associated with the model, the posterior inclusion probabilities (PIPs)
+#'         for each exposure entering into the model, and the matrix of 2-way interaction
+#'         probabilities
+#'         
 #'
 #' @export
 #' @examples
@@ -140,6 +144,8 @@ NLint = function(Y=Y, X=X, C=C, nChains = 2, nIter = 10000,
   l = list(posterior = posterior,
            waic = waic,
            InteractionPIP = intMean,
-           MainPIP = inclusions)
+           MainPIP = inclusions,
+           ns = ns,
+           k = k)
   return(l)
 }
