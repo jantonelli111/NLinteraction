@@ -125,6 +125,16 @@ plotSurface1d(NLmod = NLmod, X=X, C=C, j1=4, j2=5,
 
 ![Alt text](images/plot7.png)
 
+We see that the curves look dramatically different at different values of X5, since they have a strong interaction with each other. We fixed the remaining exposures at their median (quantile_rest = 0.5), though results do not change if we change this parameter, because X4 doesn't interact with any other variables. 
+
+While it is illustrative to see the curves for one dimension at a time, it is also of interest to explore the full bivariate relationship between two exposures. Again we will stick with X4 and X5 and use the following function:
+
+![Alt text](images/plot8.png)
+
+The left panel is the posterior mean and the right panel is the pointwise posterior SD. Notice that there are blocks in the figure, which come from the fact that we discretized the space in a grid, and the grid length is controlled by gridLength_j1 and gridLength_j2. We can double it and see that the plot becomes more smooth. Generally the plot will look nicer for larger grid lengths, however, it takes a bit longer to calculate, since we have to calculate the posterior predictive distribution at more points.
+
+![Alt text](images/plot9.png)
+
 **References**
 
 Joseph Antonelli, Maitreyi Mazumdar, David Bellinger, David C. Christiani, Robert Wright, Brent A. Coull. **Bayesian variable selection for multi-dimensional semiparametric regression models**. 2018. arXiv:1711.11239
