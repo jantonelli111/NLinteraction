@@ -4,13 +4,43 @@
 #' a potentially nonlinear, interactive effect between x and y while
 #' adjusting for c linearly
 #'
-#' @param y              The outcome to be analyzed
-#' @param x              an n by p matrix of exposures to evaluate
-#' @param c              An n by q matrix of additional covariates to adjust for
-#'                                          
+#' @param Y              The outcome to be analyzed.
+#' @param X              an n by p matrix of exposures to evaluate. These should be continuous.
+#' @param C              An n by q matrix of additional covariates to adjust for.
+#' 
+#' @param nScans         The number of MCMC scans to run.
+#' @param nBurn          The number of MCMC scans that will be dropped as a burn-in.
+#' @param thin           This number represents how many iterations between each scan.
+#' 
+#' @param c              The first hyperparameter of the inverse gamma prior on the residual variance
+#' @param d              The second hyperparameter of the inverse gamma prior on the residual variance
+#' 
+#' @param sigB           Either a numeric value to be used for the value of sigma_beta,
+#'                       the variance of the slab distribution,
+#'                       or "EB" is specified to indicate that it will be estimated
+#'                       via empirical Bayes. We recommend "EB" unless the user has
+#'                       strong prior beliefs about the magnitude of the nonzero regression
+#'                       coefficients
+#'                       
+#' @param k              The number of total components to allow in the model
+#' @param ns             The degrees of freedom of the splines used to estimate nonlinear functions of the exposures
+#' @param alph           The first hyperparameter for the beta prior on the probability of an exposure being included
+#'                       in a given component
+#' @param gamm           The second hyperparameter for the beta prior on the probability of an exposure being included
+#'                       in a given component
+#'                       
+#' @param probSamp1      The proportion of the time the MCMC updates one variable at a time for each component as opposed to
+#'                       two at a time. We have found that sampling one at a time is faster computationally, but we don't 
+#'                       recommend probSamp1 = 1, because it is possible for some interactions to be significant without 
+#'                       their main effects being significant, and these associations are much easier to pick up 2 at a time
+#'                      
+#' @param threshold      thresholding parameter when finding the lower bound for the slab variance. This parameter represents
+#'                       the percentage of time a null association enters the model when tau_h = 0.5. Smaller values are more
+#'                       conservative and prevent false discoveries. We recommend either 0.25 or 0.1. This lower bound is only
+#'                       calculated if the "EB" option is selected, as it is used to make sure the empirical Bayes variance isn't
+#'                       too small                                                                                                                                                                                             
 #'
-#' @return An list of values that contain the treatment effect, confidence interval for the 
-#'         treatment effect, and full posterior draws for the treatment effect.
+#' @return A list of values
 #'
 #' @export
 #' @examples
@@ -45,7 +75,7 @@
 NLint = function(Y=Y, X=X, C=C, nChains = 2, nIter = 10000, 
                  nBurn = 2000, thin = 8, c = 0.001, d = 0.001,
                  sigB="EB", k = 15, ns = 3, alph=3, gamm=dim(X)[2], 
-                 probSamp1 = 0.5, threshold = 0.25) {
+                 probSamp1 = 0.9, threshold = 0.1) {
   
   SigmaC = 1000*diag(dim(C)[2]+1)
   muC = rep(0, dim(C)[2]+1)
