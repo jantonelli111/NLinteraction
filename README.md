@@ -38,12 +38,48 @@ So we've generated p=10 exposures that are of interest for this software, one ad
 
 ### Main MCMC function
 
-Now we will build our model. The first thing to note is that the number of degrees of freedom of the splines in the model is very important and therefore the model should be built for a few different values of the degrees of freedom and then the WAIC can be used to evaluate which model to proceed with. Here we will choose 2 and 5 degrees of freedom, and we know that the model with 2 should be preferred. Degrees of freedom is controlled by the ns parameter in the model. We also must select the number of MCMC iterations we want (nIter), the number to throw out with the burn-in (nBurn), how many samples to thin (thin), and how many chains to run (nChains). Other parameters that control things such as the hyperparameters of the prior distributions in the model can be changed as well, but we recommend using the pre-set values unless their is strong prior information and the user fully understands the prior distributions.
+Now we will build our model. The first thing to note is that the number of degrees of freedom of the splines in the model is very important and therefore the model should be built for a few different values of the degrees of freedom and then the WAIC can be used to evaluate which model to proceed with. Here we will choose 2 and 3 degrees of freedom. Degrees of freedom is controlled by the ns parameter in the model. We also must select the number of MCMC iterations we want (nIter), the number to throw out with the burn-in (nBurn), how many samples to thin (thin), and how many chains to run (nChains). Other parameters that control things such as the hyperparameters of the prior distributions in the model can be changed as well, but we recommend using the pre-set values unless their is strong prior information and the user fully understands the prior distributions.
 
 ```
 NLmod2 = NLint(Y=Y, X=X, C=C, nIter=1000, nBurn=500, thin=2, nChains=2, ns=2)
-NLmod5 = NLint(Y=Y, X=X, C=C, nIter=1000, nBurn=500, thin=2, nChains=2, ns=5)
+NLmod3 = NLint(Y=Y, X=X, C=C, nIter=1000, nBurn=500, thin=2, nChains=2, ns=3)
+```
 
+So we can now evaluate the WAIC of each model
+
+```
+print(c(NLmod2$waic,NLmod3$waic))
+```
+![Alt text](images/plot1.png)
+
+And we see that the 2 degree of freedom model is preferred so we will continue with inference using that model. Let's call this model NLmod
+
+```
+NLmod = NLmod2
+```
+
+### Posterior inclusion probabilities
+
+One quantity of interest is the posterior probability that each exposure enters into the model (regardless of the order of interaction). This can be extracted with the following object:
+
+```
+NLmod$MainPIP
+```
+and we can easily visualize them.
+
+```
+barplot(NLmod$MainPIP)
+```
+We can also look at the matrix of two-way interaction probabilities.
+
+```
+NLmod$InteractionPIP
+```
+
+We have a built-in function to plot the two-way posterior inclusion probabilities
+
+```
+plotInt(NLmod = NLmod)
 ```
 
 
