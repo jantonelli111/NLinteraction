@@ -92,6 +92,20 @@ plotInt(NLmod = NLmod)
 
 ![Alt text](images/plot5.png)
 
+We can also calculate any order interaction we want using the following function
+
+```
+InteractionProb(NLmod=NLmod, Xsub=c(4,5,9))
+```
+
+![Alt text](images/plot6.png)
+
+Which shows that the posterior inclusion probability of a three-way interaction between X4, X5, and X9 is 0. This function can be used to calculate any order interaction, and the order is dictated by the length of Xsub. If Xsub were to instead be simply a scalar, this function would return the marginal inclusion probabilities we first looked at. 
+
+### Visualizing exposure response surfaces
+
+Now that we know which exposures are important for predicting the outcome, we can visualize the associations that our model has identified. There are a number of plotting techniques to do this built into the function and we detail them here. 
+
 
 **References**
 
