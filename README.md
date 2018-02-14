@@ -65,22 +65,32 @@ One quantity of interest is the posterior probability that each exposure enters 
 ```
 NLmod$MainPIP
 ```
+
+![Alt text](images/plot2.png)
+
 and we can easily visualize them.
 
 ```
 barplot(NLmod$MainPIP)
 ```
+
+![Alt text](images/plot3.png)
+
 We can also look at the matrix of two-way interaction probabilities.
 
 ```
 NLmod$InteractionPIP
 ```
 
+![Alt text](images/plot4.png)
+
 We have a built-in function to plot the two-way posterior inclusion probabilities
 
 ```
 plotInt(NLmod = NLmod)
 ```
+
+![Alt text](images/plot5.png)
 
 
 **References**
