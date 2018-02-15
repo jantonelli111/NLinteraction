@@ -2,7 +2,7 @@
 % Please edit documentation in R/main.R
 \name{InteractionProb}
 \alias{InteractionProb}
-\title{Estimate nonlinear association and identify interactions}
+\title{Calculate posterior inclusion probabilities for an interaction}
 \usage{
 InteractionProb(NLmod, Xsub)
 }
@@ -17,9 +17,8 @@ A number indicating the posterior probability that the exposures in Xsub are joi
         of length 2, the two way interaction is returned and so on.
 }
 \description{
-This function takes in the observed data (y, x, c) and estimates
-a potentially nonlinear, interactive effect between x and y while
-adjusting for c linearly
+This function takes a fitted NLint object and can return the posterior
+probability that any given set of variables are jointly interacting with each other.
 }
 \examples{
 

@@ -13,7 +13,9 @@ NLint(Y = Y, X = X, C = C, nChains = 2, nIter = 10000, nBurn = 2000,
 
 \item{X}{an n by p matrix of exposures to evaluate. These should be continuous.}
 
-\item{C}{An n by q matrix of additional covariates to adjust for.}
+\item{C}{An n by q matrix of additional covariates to adjust for. If there are no
+additional covariates (i.e q=0), then C should be set to NULL when specifying
+the model}
 
 \item{nBurn}{The number of MCMC scans that will be dropped as a burn-in.}
 

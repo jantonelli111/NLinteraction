@@ -2111,11 +2111,11 @@ MCMCmixture = function(Y, X, C, Xstar, nChains = 2, nIter = 30000, nBurn = 10000
                        c = 0.001, d = 0.001, sigB, muB, SigmaC, muC,
                        k = 10, ns = 4, alph, gamm, probSamp1=1) {
   
+  designC = cbind(rep(1,n), C)
+  
   n = dim(X)[1]
   p = dim(X)[2]
-  pc = dim(C)[2]
-  
-  designC = cbind(rep(1,n), C)
+  pc = dim(designC)[2] - 1
   
   zetaPost = array(NA, dim=c(nChains, nIter, p, k))
   alphaPost = array(NA, dim=c(nChains, nIter))
@@ -2294,11 +2294,11 @@ MCMCmixtureEB = function(Y, X, C, Xstar, nChains = 2, nIter = 30000, nBurn = 100
                          c = 0.001, d = 0.001, sigBstart, muB, SigmaC, muC,
                          k = 10, ns = 4, alph, gamm, probSamp1=1, SigMin = 0.1) {
   
+  designC = cbind(rep(1,n), C)
+  
   n = dim(X)[1]
   p = dim(X)[2]
-  pc = dim(C)[2]
-  
-  designC = cbind(rep(1,n), C)
+  pc = dim(designC)[2] - 1
   
   zetaPost = array(NA, dim=c(nChains, nIter, p, k))
   alphaPost = array(NA, dim=c(nChains, nIter))
@@ -2500,15 +2500,15 @@ MCMCmixtureMinSig = function(Y, X, C, Xstar, nPerms = 10, nIter = 500,
     
     nChains = 1
     
+    designC = cbind(rep(1,n), C)
+    
     n = dim(X)[1]
     p = dim(X)[2]
-    pc = dim(C)[2]
+    pc = dim(designC)[2] - 1
     
     ## Permute the data
     perms = sample(1:n, n, replace=FALSE)
     Y = Ysave[perms]
-    
-    designC = cbind(rep(1,n), C)
     
     zetaPost = array(NA, dim=c(nChains, nIter, p, k))
     tauPost = array(NA, dim=c(nChains, nIter, k))

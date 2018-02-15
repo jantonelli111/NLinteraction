@@ -6,7 +6,9 @@
 #'
 #' @param Y              The outcome to be analyzed.
 #' @param X              an n by p matrix of exposures to evaluate. These should be continuous.
-#' @param C              An n by q matrix of additional covariates to adjust for.
+#' @param C              An n by q matrix of additional covariates to adjust for. If there are no
+#'                       additional covariates (i.e q=0), then C should be set to NULL when specifying
+#'                       the model
 #' 
 #' @param nScans         The number of MCMC scans to run.
 #' @param nBurn          The number of MCMC scans that will be dropped as a burn-in.
@@ -81,10 +83,10 @@ NLint = function(Y=Y, X=X, C=C, nChains = 2, nIter = 10000,
                  sigB="EB", k = 15, ns = 3, alph=3, gamm=dim(X)[2], 
                  probSamp1 = 0.9, threshold = 0.1) {
   
-  SigmaC = 1000*diag(dim(C)[2]+1)
-  muC = rep(0, dim(C)[2]+1)
-  
   designC = cbind(rep(1, dim(X)[1]), C)
+  
+  SigmaC = 1000*diag(dim(designC)[2])
+  muC = rep(0, dim(designC)[2])
   
   ## Prior mean vector
   muB = rep(0, ns)
@@ -156,11 +158,10 @@ NLint = function(Y=Y, X=X, C=C, nChains = 2, nIter = 10000,
 
 
 
-#' Estimate nonlinear association and identify interactions
+#' Calculate posterior inclusion probabilities for an interaction
 #' 
-#' This function takes in the observed data (y, x, c) and estimates
-#' a potentially nonlinear, interactive effect between x and y while
-#' adjusting for c linearly
+#' This function takes a fitted NLint object and can return the posterior
+#' probability that any given set of variables are jointly interacting with each other.
 #'
 #' @param NLmod              The fitted NLint object
 #' @param Xsub               The exposures for which you want to evaluate whether there is an interaction
