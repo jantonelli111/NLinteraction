@@ -143,7 +143,7 @@ plotSurface2dSD(NLmod = NLmod, X=X, C=C, j1=4, j2=5,
 
 ![Alt text](images/plot8.png)
 
-The left panel is the posterior mean and the right panel is the pointwise posterior SD. Notice that there are blocks in the figure, which come from the fact that we discretized the space in a grid, and the grid length is controlled by gridLength_j1 and gridLength_j2. We can double it and see that the plot becomes more smooth. Generally the plot will look nicer for larger grid lengths, however, it takes a bit longer to calculate, since we have to calculate the posterior predictive distribution at more points.
+The left panel is the posterior mean and the right panel is the pointwise posterior SD. The black dots are the observed data points. Notice that there are blocks in the figure, which come from the fact that we discretized the space in a grid, and the grid length is controlled by gridLength_j1 and gridLength_j2. We can double it and see that the plot becomes more smooth. Generally the plot will look nicer for larger grid lengths, however, it takes a bit longer to calculate, since we have to calculate the posterior predictive distribution at more points.
 
 ```
 plotSurface2dMean(NLmod = NLmod, X=X, C=C, j1=4, j2=5,
@@ -157,6 +157,24 @@ plotSurface2dSD(NLmod = NLmod, X=X, C=C, j1=4, j2=5,
 ```
 
 ![Alt text](images/plot9.png)
+
+Finally, in some areas of the figure there isn't a lot of data and any predictions we make in that region effectively amount to extrapolation. If the user does not want to do this, then they can set the minDist option to the value such that points in the grid without observed data points within minDist of them are excluded in the figure. We can see that here:
+
+```
+par(mfrow=c(1,2), pty='s')
+plotSurface2dMean(NLmod = NLmod, X=X, C=C, j1=4, j2=5,
+                  gridLength_j1=40, gridLength_j2 = 40,
+                  quantile_rest = 0.5, xlab='X4', ylab='X5',
+                  main="Posterior mean", minDist=0.5)
+points(X[,4], X[,5], pch=16, cex=0.5)
+plotSurface2dSD(NLmod = NLmod, X=X, C=C, j1=4, j2=5,
+                gridLength_j1=40, gridLength_j2 = 40,
+                quantile_rest = 0.5, xlab='X4', ylab='X5',
+                main="Posterior SD", minDist=0.5)
+points(X[,4], X[,5], pch=16, cex=0.5)
+```
+
+![Alt text](images/plot10.png)
 
 **References**
 
