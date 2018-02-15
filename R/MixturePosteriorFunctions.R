@@ -49,9 +49,16 @@ PredictionsMixture = function(XstarOld, XstarNew, designC, totalScans, nChains, 
           f_jhi_temp[,h] = tempXstarNew %*% as.vector(betaList[[ni]][[nc]][[h]])
         }
       }
-      PredictedPost[nc,counter,] = apply(f_jhi_temp, 1, sum) + 
-        (designC %*% betaCPost[nc,ni,])
-      hHatPost[nc,counter,] = apply(f_jhi_temp, 1, sum)
+      
+      if (dim(designC)[2] == 1) {
+        PredictedPost[nc,counter,] = apply(f_jhi_temp, 1, sum) + 
+          (designC * betaCPost[nc,ni])
+        hHatPost[nc,counter,] = apply(f_jhi_temp, 1, sum)
+      } else {
+        PredictedPost[nc,counter,] = apply(f_jhi_temp, 1, sum) + 
+          (designC %*% betaCPost[nc,ni,])
+        hHatPost[nc,counter,] = apply(f_jhi_temp, 1, sum) 
+      }
     }
     counter = counter + 1
   }
@@ -91,8 +98,13 @@ WaicMixture = function(Xstar, designC, totalScans, nChains, zetaPost,
         }
       }
       
-      mean = apply(f_jhi_temp, 1, sum) + 
-        (designC %*% betaCPost[nc,ni,])
+      if (dim(designC)[2] == 1) {
+        mean = apply(f_jhi_temp, 1, sum) + 
+          (designC * betaCPost[nc,ni])
+      } else {
+        mean = apply(f_jhi_temp, 1, sum) + 
+          (designC %*% betaCPost[nc,ni,]) 
+      }
       
       pdf = (1 / sqrt(2*pi*sigmaPost[nc,ni]))*exp(-((Y - mean)^2)/(2*sigmaPost[nc,ni]))
       LPost[nc,counter,] = pdf
@@ -116,6 +128,19 @@ PlotInteraction = function(j1, j2, X, Xstar, C, quantile_j2, quantile_rest,
                                   ns, gridLength, p, zetaPost, betaList, 
                                   betaCPost, totalScans, nChains, k,...) {
 
+  if (is.null(C)) {
+    pc = 0
+    NewDesignC = matrix(NA, gridLength, pc+1)
+    NewDesignC[,1] = 1
+  } else {
+    pc = dim(C)[2]
+    NewDesignC = matrix(NA, gridLength, pc+1)
+    NewDesignC[,1] = 1
+    for (jc in 1 : pc) {
+      NewDesignC[,jc+1] = mean(C[,jc])
+    }
+  }
+  
   n = dim(X)[1]
   NewDesignMat = matrix(NA, gridLength, p)
   for (j in 1 : p) {
@@ -133,12 +158,6 @@ PlotInteraction = function(j1, j2, X, Xstar, C, quantile_j2, quantile_rest,
     temp_sds = apply(temp_ns_object, 2, sd)
     temp_means = apply(temp_ns_object, 2, mean)
     NewDesign[,j,2:(ns+1)] = t((t(predict(temp_ns_object, NewDesignMat[,j])) - temp_means) / temp_sds)
-  }
-  
-  NewDesignC = matrix(NA, gridLength, pc+1)
-  NewDesignC[,1] = 1
-  for (jc in 1 : pc) {
-    NewDesignC[,jc+1] = mean(C[,jc])
   }
 
 
@@ -171,6 +190,19 @@ PlotInteractionHeatmapMeanSD = function(j1, j2, grid_j1, grid_j2, Xstar, X, C, q
                                   ns, p, zetaPost, betaList, minDist=Inf,
                                   betaCPost, totalScans, nChains, k,...) {
   
+  if (is.null(C)) {
+    pc = 0
+    NewDesignC = matrix(NA, length(grid_j1)*length(grid_j2), pc+1)
+    NewDesignC[,1] = 1
+  } else {
+    pc = dim(C)[2]
+    NewDesignC = matrix(NA, length(grid_j1)*length(grid_j2), pc+1)
+    NewDesignC[,1] = 1
+    for (jc in 1 : pc) {
+      NewDesignC[,jc+1] = mean(C[,jc])
+    }
+  }
+  
   colors = colorRampPalette(c("blue", "green", "red"))
   
   NewDesignMat = matrix(NA, length(grid_j1)*length(grid_j2), p)
@@ -191,12 +223,6 @@ PlotInteractionHeatmapMeanSD = function(j1, j2, grid_j1, grid_j2, Xstar, X, C, q
     temp_sds = apply(temp_ns_object, 2, sd)
     temp_means = apply(temp_ns_object, 2, mean)
     NewDesign[,j,2:(ns+1)] = t((t(predict(temp_ns_object, NewDesignMat[,j])) - temp_means) / temp_sds)
-  }
-  
-  NewDesignC = matrix(NA, length(grid_j1)*length(grid_j2), pc+1)
-  NewDesignC[,1] = 1
-  for (jc in 1 : pc) {
-    NewDesignC[,jc+1] = mean(C[,jc])
   }
   
   predictions = PredictionsMixture(XstarOld = Xstar, XstarNew = NewDesign, designC = NewDesignC, 
@@ -230,6 +256,19 @@ PlotInteractionHeatmapMean = function(j1, j2, grid_j1, grid_j2, Xstar, X, C, qua
                                         ns, p, zetaPost, betaList, minDist=Inf,
                                         betaCPost, totalScans, nChains, k,...) {
   
+  if (is.null(C)) {
+    pc = 0
+    NewDesignC = matrix(NA, length(grid_j1)*length(grid_j2), pc+1)
+    NewDesignC[,1] = 1
+  } else {
+    pc = dim(C)[2]
+    NewDesignC = matrix(NA, length(grid_j1)*length(grid_j2), pc+1)
+    NewDesignC[,1] = 1
+    for (jc in 1 : pc) {
+      NewDesignC[,jc+1] = mean(C[,jc])
+    }
+  }
+  
   colors = colorRampPalette(c("blue", "green", "red"))
   
   NewDesignMat = matrix(NA, length(grid_j1)*length(grid_j2), p)
@@ -250,12 +289,6 @@ PlotInteractionHeatmapMean = function(j1, j2, grid_j1, grid_j2, Xstar, X, C, qua
     temp_sds = apply(temp_ns_object, 2, sd)
     temp_means = apply(temp_ns_object, 2, mean)
     NewDesign[,j,2:(ns+1)] = t((t(predict(temp_ns_object, NewDesignMat[,j])) - temp_means) / temp_sds)
-  }
-  
-  NewDesignC = matrix(NA, length(grid_j1)*length(grid_j2), pc+1)
-  NewDesignC[,1] = 1
-  for (jc in 1 : pc) {
-    NewDesignC[,jc+1] = mean(C[,jc])
   }
   
   predictions = PredictionsMixture(XstarOld = Xstar, XstarNew = NewDesign, designC = NewDesignC, 
@@ -287,6 +320,19 @@ PlotInteractionHeatmapSD = function(j1, j2, grid_j1, grid_j2, Xstar, X, C, quant
                                         ns, p, zetaPost, betaList, minDist=Inf,
                                         betaCPost, totalScans, nChains, k,...) {
   
+  if (is.null(C)) {
+    pc = 0
+    NewDesignC = matrix(NA, length(grid_j1)*length(grid_j2), pc+1)
+    NewDesignC[,1] = 1
+  } else {
+    pc = dim(C)[2]
+    NewDesignC = matrix(NA, length(grid_j1)*length(grid_j2), pc+1)
+    NewDesignC[,1] = 1
+    for (jc in 1 : pc) {
+      NewDesignC[,jc+1] = mean(C[,jc])
+    }
+  }
+  
   colors = colorRampPalette(c("blue", "green", "red"))
   
   NewDesignMat = matrix(NA, length(grid_j1)*length(grid_j2), p)
@@ -307,12 +353,6 @@ PlotInteractionHeatmapSD = function(j1, j2, grid_j1, grid_j2, Xstar, X, C, quant
     temp_sds = apply(temp_ns_object, 2, sd)
     temp_means = apply(temp_ns_object, 2, mean)
     NewDesign[,j,2:(ns+1)] = t((t(predict(temp_ns_object, NewDesignMat[,j])) - temp_means) / temp_sds)
-  }
-  
-  NewDesignC = matrix(NA, length(grid_j1)*length(grid_j2), pc+1)
-  NewDesignC[,1] = 1
-  for (jc in 1 : pc) {
-    NewDesignC[,jc+1] = mean(C[,jc])
   }
   
   predictions = PredictionsMixture(XstarOld = Xstar, XstarNew = NewDesign, designC = NewDesignC, 

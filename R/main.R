@@ -138,7 +138,7 @@ NLint = function(Y=Y, X=X, C=C, nChains = 2, nIter = 10000,
   
   intMean = InteractionMatrix(zetaPost = posterior$zeta, totalScans = totalScans,
                                     nChains = 2, p = p, k = k)
-  
+
   inclusions = InclusionVector(zetaPost = posterior$zeta, totalScans = totalScans,
                                     nChains = 2, p = p, k = k)
   
