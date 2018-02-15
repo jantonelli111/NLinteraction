@@ -129,9 +129,32 @@ We see that the curves look dramatically different at different values of X5, si
 
 While it is illustrative to see the curves for one dimension at a time, it is also of interest to explore the full bivariate relationship between two exposures. Again we will stick with X4 and X5 and use the following function:
 
+```
+par(mfrow=c(1,2), pty='s')
+plotSurface2dMean(NLmod = NLmod, X=X, C=C, j1=4, j2=5,
+              gridLength_j1=20, gridLength_j2 = 20,
+              quantile_rest = 0.5, xlab='X4', ylab='X5',
+              main="Posterior mean")
+plotSurface2dSD(NLmod = NLmod, X=X, C=C, j1=4, j2=5,
+                  gridLength_j1=20, gridLength_j2 = 20,
+                  quantile_rest = 0.5, xlab='X4', ylab='X5',
+                  main="Posterior SD")
+```
+
 ![Alt text](images/plot8.png)
 
 The left panel is the posterior mean and the right panel is the pointwise posterior SD. Notice that there are blocks in the figure, which come from the fact that we discretized the space in a grid, and the grid length is controlled by gridLength_j1 and gridLength_j2. We can double it and see that the plot becomes more smooth. Generally the plot will look nicer for larger grid lengths, however, it takes a bit longer to calculate, since we have to calculate the posterior predictive distribution at more points.
+
+```
+plotSurface2dMean(NLmod = NLmod, X=X, C=C, j1=4, j2=5,
+                  gridLength_j1=40, gridLength_j2 = 40,
+                  quantile_rest = 0.5, xlab='X4', ylab='X5',
+                  main="Posterior mean")
+plotSurface2dSD(NLmod = NLmod, X=X, C=C, j1=4, j2=5,
+                gridLength_j1=40, gridLength_j2 = 40,
+                quantile_rest = 0.5, xlab='X4', ylab='X5',
+                main="Posterior SD")
+```
 
 ![Alt text](images/plot9.png)
 
