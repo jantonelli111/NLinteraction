@@ -2252,6 +2252,8 @@ MCMCmixture = function(Y, X, C, Xstar, nChains = 2, nIter = 30000, nBurn = 10000
               }
             }
             
+            tempXstar = cbind(rep(1, n), scale(cbind(tempXstar[,-1])))
+            
             f_jhi[nc,,h] = tempXstar %*%  as.vector(betaList[[ni]][[nc]][[h]])
             
             tempZeta[,h2] = rep(0,p)
@@ -2437,6 +2439,8 @@ MCMCmixtureEB = function(Y, X, C, Xstar, nChains = 2, nIter = 30000, nBurn = 100
                 }
               }
             }
+            
+            tempXstar = cbind(rep(1, n), scale(cbind(tempXstar[,-1])))
             
             f_jhi[nc,,h] = tempXstar %*%  as.vector(betaList[[ni]][[nc]][[h]])
             
