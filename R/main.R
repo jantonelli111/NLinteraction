@@ -216,3 +216,97 @@ InteractionProb = function(NLmod, Xsub) {
   return(mean(intMat))
 }
 
+
+
+
+
+
+
+
+
+#' Predict outcome at a given set of locations
+#' 
+#' This function takes in new data points and estimates
+#' the posterior predictive distribution of outcome at these
+#' locations
+#'
+#' @param NLmod          A model built from the NLint function that predictions will be based on
+#' @param X              The original matrix of exposures used to build NLmod
+#' @param Xnew           The new set of exposures at which predictions are to be made for
+#' @param Cnew           Matrix of additional covariates at which to make predictions
+#' 
+#'
+#' @return The posterior means, 95% pointwise credible intervals, and full posterior draws
+#'         for the predicted outcome
+#'         
+#'
+#' @export
+#' @examples
+#'
+#' n = 200
+#' p = 10
+#' pc = 1
+#' 
+#' sigma = matrix(0.3, p, p)
+#' diag(sigma) = 1
+#' X = rmvnorm(n, mean=rep(0,p), sigma = sigma)
+#' 
+#' C = matrix(rnorm(n*pc), nrow=n)
+#' 
+#' TrueH = function(X) {
+#'   return(0.5*(X[,2]*X[,3]) - 0.6*(X[,4]^2 * X[,5]))
+#' }
+#' 
+#' Y = 5 + C + TrueH(X) + rnorm(n)
+#' 
+#' NLmod = NLint(Y=Y, X=X, C=C)
+#' 
+#' Xnew = matrix(rnorm(200*p), 200, p)
+#' Cnew = rnorm(200)
+#' 
+#' predictions = NLpredict(NLmod=NLmod,
+#'                         X=X, Xnew=Xnew,
+#'                         Cnew=Cnew)
+
+
+
+NLpredict = function(NLmod=NLmod, X=X, Xnew=Xnew, 
+                     Cnew=Cnew) {
+  
+  ns = NLmod$ns
+  k = NLmod$k
+  
+  n2 = dim(Xnew)[1]
+  designC = cbind(rep(1,n2), Cnew)
+  
+  Xstar = array(NA, dim=c(n,p,ns+1))
+  Xstar[,,1] = 1
+  for (j in 1 : p) {
+    Xstar[,j,2:(ns+1)] = scale(splines::ns(X[,j], df=ns))
+  }
+  
+  XstarNew = array(NA, dim=c(n2,p,ns+1))
+  XstarNew[,,1] = 1
+  for (j in 1 : p) {
+    temp_ns_object = ns(X[,j], df=ns)
+    temp_means = apply(temp_ns_object, 2, mean)
+    temp_sds = apply(temp_ns_object, 2, sd)
+    XstarNew[,j,2:(ns+1)] = cbind(t((t(predict(temp_ns_object, 
+                                               Xnew[,j])) - temp_means) / temp_sds))
+  }
+  
+  predictions = PredictionsMixture(XstarOld=Xstar, XstarNew=XstarNew, 
+                     designC=designC, totalScans=dim(NLmod$posterior$zeta)[2], 
+                     nChains=dim(NLmod$posterior$zeta)[1], 
+                     zetaPost=NLmod$posterior$zeta, 
+                     betaList=NLmod$posterior$beta, 
+                     betaCPost=NLmod$posterior$betaC, k=k, ns=ns)
+  
+  
+  l = list(mean = apply(predictions$PredictedPost, 3, mean, na.rm=TRUE),
+           CIlower = apply(predictions$PredictedPost, 3, quantile, c(.025), na.rm=TRUE),
+           CIupper = apply(predictions$PredictedPost, 3, quantile, c(.975), na.rm=TRUE),
+           posterior = predictions$PredictedPost)
+  return(l)
+}
+

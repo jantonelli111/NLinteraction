@@ -2,6 +2,7 @@
 
 export(InteractionProb)
 export(NLint)
+export(NLpredict)
 export(plotInt)
 export(plotSurface1d)
 export(plotSurface2d)
