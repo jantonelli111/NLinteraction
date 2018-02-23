@@ -30,11 +30,9 @@
 #'                       in a given component
 #' @param gamm           The second hyperparameter for the beta prior on the probability of an exposure being included
 #'                       in a given component
+#' @param intMax         The highest order interaction the user wants to allow in the model. This can be set to p to allow
+#'                       any order interaction, though the default is 3.
 #'                       
-#' @param probSamp1      The proportion of the time the MCMC updates one variable at a time for each component as opposed to
-#'                       two at a time. We have found that sampling one at a time is faster computationally, but we don't 
-#'                       recommend probSamp1 = 1, because it is possible for some interactions to be significant without 
-#'                       their main effects being significant, and these associations are much easier to pick up 2 at a time
 #'                      
 #' @param threshold      thresholding parameter when finding the lower bound for the slab variance. This parameter represents
 #'                       the percentage of time a null association enters the model when tau_h = 0.5. Smaller values are more
@@ -81,7 +79,7 @@
 NLint = function(Y=Y, X=X, C=C, nChains = 2, nIter = 10000, 
                  nBurn = 2000, thin = 8, c = 0.001, d = 0.001,
                  sigB="EB", k = 15, ns = 3, alph=3, gamm=dim(X)[2], 
-                 probSamp1 = 0.9, threshold = 0.1) {
+                 threshold = 0.1, intMax=3) {
   
   designC = cbind(rep(1, dim(X)[1]), C)
   
@@ -105,13 +103,13 @@ NLint = function(Y=Y, X=X, C=C, nChains = 2, nIter = 10000,
                                nIter = 500, c = c, d = d,
                                sigBstart=0.5, muB=muB,
                                SigmaC=SigmaC, muC=muC, 
-                               k = k, ns = ns, threshold=0.25)
+                               k = k, ns = ns, threshold=threshold)
     
     SigEstEB = MCMCmixtureEB(Y=Y, X=X, C=C, Xstar = Xstar, nChains = nChains, nIter = nIter, 
                              nBurn = nBurn, thin = thin, c = c, d = d,
                              sigBstart=0.5, muB=muB,
                              SigmaC=SigmaC, muC=muC, 
-                             k = k, ns = ns, alph=alph, gamm=gamm, probSamp1 = probSamp1)
+                             k = k, ns = ns, alph=alph, gamm=gamm, intMax=intMax)
     
     SigEst = max(SigEstEB, SigMin)
     
@@ -119,13 +117,13 @@ NLint = function(Y=Y, X=X, C=C, nChains = 2, nIter = 10000,
                             nBurn = nBurn, thin = thin, c = c, d = d,
                             sigB=SigEst, muB=muB,
                             SigmaC=SigmaC, muC=muC, 
-                            k = k, ns = ns, alph=alph, gamm=gamm, probSamp1 = probSamp1) 
+                            k = k, ns = ns, alph=alph, gamm=gamm, intMax=intMax) 
   } else {
     posterior = MCMCmixture(Y=Y, X=X, C=C, Xstar = Xstar, nChains = nChains, nIter = nIter, 
                             nBurn = nBurn, thin = thin, c = c, d = d,
                             sigB=sigB, muB=muB,
                             SigmaC=SigmaC, muC=muC, 
-                            k = k, ns = ns, alph=alph, gamm=gamm, probSamp1 = probSamp1) 
+                            k = k, ns = ns, alph=alph, gamm=gamm, intMax=intMax) 
   }
   
   keep = nBurn + (1:floor((nIter - nBurn) / thin))*thin

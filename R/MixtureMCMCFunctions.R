@@ -43,12 +43,10 @@ ActivePred = function(zeta, k) {
 
 UpdateBetaOne = function(tempZeta, f_jhi_nc, betaC,
                          sigmaP, tau, k, sigB, Xstar, tempBeta, h,
-                         designC, ns) {
+                         designC, ns, groups, intMax) {
   
   activeZ = ActivePred(tempZeta, k=k)
   numZero = length(which(apply(tempZeta[,-h], 2, sum) == 0))
-  
-  groups = sample(1:p, 1, replace=FALSE)
   
   tempY = Y - apply(f_jhi_nc[,-h], 1, sum) -
     (designC %*% betaC)
@@ -146,7 +144,7 @@ UpdateBetaOne = function(tempZeta, f_jhi_nc, betaC,
   }
   
   ## Now calculate probability for full interactions
-  if ((numZero > 0 & sum(tempZeta10[,h]) > 1) |
+  if ((numZero > 0 & sum(tempZeta10[,h]) > 1 & length(wv) < intMax) |
       sum(tempZeta10[,h]) == 1) {
     if (length(wv) == 0) {
       
@@ -230,13 +228,17 @@ UpdateBetaOne = function(tempZeta, f_jhi_nc, betaC,
     }
   }
   
+  maxlog_temp = max(c(p00, p10))
+  updated_p_temp = exp(c(p00, p10) - maxlog_temp)
+  samp_temp = sample(1:2, 1, p=updated_p_temp)
+  
+  PossMatTemp = expand.grid(rep(list(c(0,1)), length(wv)))
+  PossMat = PossMatTemp[-nrow(PossMatTemp),]
+  
+  wh01 = which(apply(tempZeta, 2, sum) == 0 & 1:k != h)[1]
+  
   ## Now calculate probability for reduced model + effect elsewhere
-  if (numZero > 0 & sum(tempZeta10[,h]) > 1) {
-    
-    PossMatTemp = expand.grid(rep(list(c(0,1)), length(wv)))
-    PossMat = PossMatTemp[-nrow(PossMatTemp),]
-    
-    wh01 = which(apply(tempZeta, 2, sum) == 0 & 1:k != h)[1]
+  if (numZero > 0 & sum(tempZeta10[,h]) > 1 & samp_temp == 2 & sum(tempZeta10[,h]) <= intMax) {
     
     if (length(wv) == 1) {
       
@@ -616,12 +618,10 @@ UpdateBetaOne = function(tempZeta, f_jhi_nc, betaC,
 
 UpdateBetaTwo = function(tempZeta, f_jhi_nc, betaC,
                          sigmaP, tau, k, sigB, Xstar, tempBeta, h,
-                         designC, ns) {
+                         designC, ns, groups, intMax) {
   
   activeZ = ActivePred(tempZeta, k=k)
   numZero = length(which(apply(tempZeta[,-h], 2, sum) == 0))
-  
-  groups = sample(1:p, 2, replace=FALSE)
   
   tempY = Y - apply(f_jhi_nc[,-h], 1, sum) -
     (designC %*% betaC)
@@ -723,7 +723,7 @@ UpdateBetaTwo = function(tempZeta, f_jhi_nc, betaC,
   }
   
   ## Now calculate probability for one higher interaction (group 1)
-  if ((numZero > 0 & sum(tempZeta10[,h]) > 1) |
+  if ((numZero > 0 & sum(tempZeta10[,h]) > 1 & sum(tempZeta10[,h]) <= intMax) |
       sum(tempZeta10[,h]) == 1) {
     if (length(wv) == 0) {
       if (h > 1 & sum(tempZeta[groups[1],1:(h-1)]) > 0) {
@@ -804,7 +804,7 @@ UpdateBetaTwo = function(tempZeta, f_jhi_nc, betaC,
   }
   
   ## Now calculate probability for one higher interaction (group 2)
-  if ((numZero > 0 & sum(tempZeta01[,h]) > 1) |
+  if ((numZero > 0 & sum(tempZeta01[,h]) > 1 & sum(tempZeta01[,h]) <= intMax) |
       sum(tempZeta01[,h]) == 1) {
     if (length(wv) == 0) {
       if (h > 1 & sum(tempZeta[groups[2],1:(h-1)]) > 0) {
@@ -885,7 +885,7 @@ UpdateBetaTwo = function(tempZeta, f_jhi_nc, betaC,
   }
   
   ## Now calculate probability for two higher order interactions (group 1 + 2)
-  if (numZero > 0) {
+  if (numZero > 0 & sum(tempZeta11[,h]) <= intMax) {
     
     wv2 = c(wv, groups)
     tempXstar = matrix(NA, n, (ns+1)^length(wv2))
@@ -944,9 +944,12 @@ UpdateBetaTwo = function(tempZeta, f_jhi_nc, betaC,
     }
   }
   
+  maxlog_temp = max(c(p00, p10, p01, p11))
+  updated_p_temp = exp(c(p00, p10, p01, p11) - maxlog_temp)
+  samp_temp = sample(1:4, 1, p=updated_p_temp)
   
   ## Now calculate probability for reduced model + effect with group 1
-  if ((numZero > 0 & sum(tempZeta10[,h]) > 1)) {
+  if ((numZero > 0 & sum(tempZeta10[,h]) > 1 & sum(tempZeta10[,h]) <= intMax) & samp_temp == 2) {
     
     PossMatTemp = expand.grid(rep(list(c(0,1)), length(wv)))
     PossMat00_1 = PossMatTemp[-nrow(PossMatTemp),]
@@ -1123,7 +1126,7 @@ UpdateBetaTwo = function(tempZeta, f_jhi_nc, betaC,
   }
   
   ## Now calculate probability for reduced model + effect with group 2
-  if ((numZero > 0 & sum(tempZeta01[,h]) > 1)) {
+  if ((numZero > 0 & sum(tempZeta01[,h]) > 1 & sum(tempZeta01[,h]) <= intMax) & samp_temp == 3) {
     
     PossMatTemp = expand.grid(rep(list(c(0,1)), length(wv)))
     PossMat00_2 = PossMatTemp[-nrow(PossMatTemp),]
@@ -1300,7 +1303,7 @@ UpdateBetaTwo = function(tempZeta, f_jhi_nc, betaC,
   }
   
   ## Now calculate probability for reduced model + int effect with group 1 + 2
-  if ((numZero > 0 & sum(tempZeta11[,h]) > 2)) {
+  if ((numZero > 0 & sum(tempZeta11[,h]) > 2) & samp_temp == 4) {
     PossMatTemp = expand.grid(rep(list(c(0,1)), length(wv)))
     PossMat00_12 = PossMatTemp[-nrow(PossMatTemp),]
     
@@ -1456,40 +1459,42 @@ UpdateBetaTwo = function(tempZeta, f_jhi_nc, betaC,
                            !activeInd %in% unlist(activeZ0011[1:(wh01-1)])))
         }
         
-        if (length(w) == 0) {
-          p00_12[iii] = log((tau[h]^(length(wv) + length(wv3Temp))) * 
-                              (1 - tau[h])^2)
-        } else if (length(w) == 1) {
-          tempXstar2 = tempXstar[,w]
-          
-          SigmaB = sigB
-          muB = rep(0, 1)
-          muBeta = solve((t(tempXstar2) %*% tempXstar2)/
-                           sigmaP + solve(SigmaB)) %*%
-            ((t(tempXstar2) %*% tempY)/
-               sigmaP + solve(SigmaB) %*% muB)
-          covBeta = solve((t(tempXstar2) %*% tempXstar2)/
-                            sigmaP + solve(SigmaB))
-          p00_12[iii] = log((tau[h]^(length(wv) + length(wv3Temp))) * 
-                              (1 - tau[h])^2) + 
-            mvtnorm::dmvnorm(rep(0, length(muB)), mean=muB, sigma=as.matrix(SigmaB), log=TRUE) - 
-            mvtnorm::dmvnorm(rep(0, length(muB)), mean=muBeta, sigma=as.matrix(covBeta), log=TRUE)
-        } else {
-          tempXstar2 = tempXstar[,w]
-          
-          SigmaB = diag(sigmaP*sigB, dim(tempXstar2)[2])
-          muB = rep(0, dim(tempXstar2)[2])
-          muBeta = solve((t(tempXstar2) %*% tempXstar2)/
-                           sigmaP + solve(SigmaB)) %*%
-            ((t(tempXstar2) %*% tempY)/
-               sigmaP + solve(SigmaB) %*% muB)
-          covBeta = solve((t(tempXstar2) %*% tempXstar2)/
-                            sigmaP + solve(SigmaB))
-          p00_12[iii] = log((tau[h]^(length(wv) + length(wv3Temp))) * 
-                              (1 - tau[h])^2) + 
-            mvtnorm::dmvnorm(rep(0, length(muB)), mean=muB, sigma=as.matrix(SigmaB), log=TRUE) - 
-            mvtnorm::dmvnorm(rep(0, length(muB)), mean=muBeta, sigma=as.matrix(covBeta), log=TRUE)
-          
+        if (length(wv3Temp) <= intMax) {
+          if (length(w) == 0) {
+            p00_12[iii] = log((tau[h]^(length(wv) + length(wv3Temp))) * 
+                                (1 - tau[h])^2)
+          } else if (length(w) == 1) {
+            tempXstar2 = tempXstar[,w]
+            
+            SigmaB = sigB
+            muB = rep(0, 1)
+            muBeta = solve((t(tempXstar2) %*% tempXstar2)/
+                             sigmaP + solve(SigmaB)) %*%
+              ((t(tempXstar2) %*% tempY)/
+                 sigmaP + solve(SigmaB) %*% muB)
+            covBeta = solve((t(tempXstar2) %*% tempXstar2)/
+                              sigmaP + solve(SigmaB))
+            p00_12[iii] = log((tau[h]^(length(wv) + length(wv3Temp))) * 
+                                (1 - tau[h])^2) + 
+              mvtnorm::dmvnorm(rep(0, length(muB)), mean=muB, sigma=as.matrix(SigmaB), log=TRUE) - 
+              mvtnorm::dmvnorm(rep(0, length(muB)), mean=muBeta, sigma=as.matrix(covBeta), log=TRUE)
+          } else {
+            tempXstar2 = tempXstar[,w]
+            
+            SigmaB = diag(sigmaP*sigB, dim(tempXstar2)[2])
+            muB = rep(0, dim(tempXstar2)[2])
+            muBeta = solve((t(tempXstar2) %*% tempXstar2)/
+                             sigmaP + solve(SigmaB)) %*%
+              ((t(tempXstar2) %*% tempY)/
+                 sigmaP + solve(SigmaB) %*% muB)
+            covBeta = solve((t(tempXstar2) %*% tempXstar2)/
+                              sigmaP + solve(SigmaB))
+            p00_12[iii] = log((tau[h]^(length(wv) + length(wv3Temp))) * 
+                                (1 - tau[h])^2) + 
+              mvtnorm::dmvnorm(rep(0, length(muB)), mean=muB, sigma=as.matrix(SigmaB), log=TRUE) - 
+              mvtnorm::dmvnorm(rep(0, length(muB)), mean=muBeta, sigma=as.matrix(covBeta), log=TRUE)
+            
+          } 
         }
         
       }
@@ -1503,7 +1508,7 @@ UpdateBetaTwo = function(tempZeta, f_jhi_nc, betaC,
   
   ## Now calculate probability for reduced model with interaction of group 1
   ## + effect with group 2
-  if (numZero > 0) {
+  if (numZero > 0 & samp_temp == 4 & sum(tempZeta10[,h]) <= intMax) {
     wv2 = c(wv, groups[1])
     PossMatTemp = expand.grid(rep(list(c(0,1)), length(wv2)))
     PossMat10_2 = PossMatTemp[-nrow(PossMatTemp),]
@@ -1682,7 +1687,7 @@ UpdateBetaTwo = function(tempZeta, f_jhi_nc, betaC,
   
   ## Now calculate probability for reduced model with interaction of group 2
   ## + effect with group 1
-  if (numZero > 0) {
+  if (numZero > 0 & samp_temp == 4 & sum(tempZeta01[,h]) <= intMax) {
     
     wv2 = c(wv, groups[2])
     PossMatTemp = expand.grid(rep(list(c(0,1)), length(wv2)))
@@ -2109,8 +2114,9 @@ UpdateBetaTwo = function(tempZeta, f_jhi_nc, betaC,
 
 MCMCmixture = function(Y, X, C, Xstar, nChains = 2, nIter = 30000, nBurn = 10000, thin = 20,
                        c = 0.001, d = 0.001, sigB, muB, SigmaC, muC,
-                       k = 10, ns = 4, alph, gamm, probSamp1=1) {
+                       k = 10, ns = 3, alph, gamm, intMax=3) {
   
+  probSamp1 = 0.95
   designC = cbind(rep(1,n), C)
   
   n = dim(X)[1]
@@ -2190,27 +2196,70 @@ MCMCmixture = function(Y, X, C, Xstar, nChains = 2, nIter = 30000, nBurn = 10000
                                  gammaPost[nc,ni] + sum(1 - zetaPost[nc,ni-1,,h]))
       }
       
+      
+      ## First update zeta and beta for those columns already with a feature
       tempZeta = zetaPost[nc,ni-1,,]
       tempBeta = betaList[[ni-1]][[nc]]
-      for (h in 1 : k) {
-        
-        OneOrTwo = sample(1:2, 1, p=c(probSamp1, 1-probSamp1), replace=FALSE)
-        
-        if (OneOrTwo == 1) {
-          UpdateBeta = UpdateBetaOne(tempZeta=tempZeta, f_jhi_nc=f_jhi[nc,,],
-                                     betaC = betaCPost[nc,ni-1,], sigmaP=sigmaPost[nc,ni],
-                                     tau=tauPost[nc,ni,], k=k, sigB=sigB, Xstar=Xstar,
-                                     tempBeta = tempBeta, h=h, designC=designC, ns=ns)
-        } else {
-          UpdateBeta = UpdateBetaTwo(tempZeta=tempZeta, f_jhi_nc=f_jhi[nc,,],
-                                     betaC = betaCPost[nc,ni-1,], sigmaP=sigmaPost[nc,ni],
-                                     tau=tauPost[nc,ni,], k=k, sigB=sigB, Xstar=Xstar,
-                                     tempBeta = tempBeta, h=h, designC=designC, ns=ns)
+      
+      NonZero = which(apply(tempZeta, 2, sum) > 0)
+      WhichZero = which(apply(tempZeta, 2, sum) == 0)
+      
+      if (length(NonZero) > 0) {
+        for (h in NonZero) {
+          
+          OneOrTwo = sample(1:2, 1, p=c(probSamp1, 1-probSamp1), replace=FALSE)
+          
+          if (OneOrTwo == 1) {
+            groups = sample(1:p, 1)
+            UpdateBeta = UpdateBetaOne(tempZeta=tempZeta, f_jhi_nc=f_jhi[nc,,],
+                                       betaC = betaCPost[nc,ni-1,], sigmaP=sigmaPost[nc,ni],
+                                       tau=tauPost[nc,ni,], k=k, sigB=sigB, Xstar=Xstar,
+                                       tempBeta = tempBeta, h=h, designC=designC, ns=ns,
+                                       groups=groups, intMax=intMax)
+          } else {
+            groups = sample(1:p, 2, replace=FALSE)
+            UpdateBeta = UpdateBetaTwo(tempZeta=tempZeta, f_jhi_nc=f_jhi[nc,,],
+                                       betaC = betaCPost[nc,ni-1,], sigmaP=sigmaPost[nc,ni],
+                                       tau=tauPost[nc,ni,], k=k, sigB=sigB, Xstar=Xstar,
+                                       tempBeta = tempBeta, h=h, designC=designC, ns=ns,
+                                       groups=groups, intMax=intMax)
+          }
+          
+          tempZeta = UpdateBeta$zeta
+          tempBeta = UpdateBeta$beta
+          f_jhi[nc,,] = UpdateBeta$f_jhi_nc
         }
-
-        tempZeta = UpdateBeta$zeta
-        tempBeta = UpdateBeta$beta
-        f_jhi[nc,,] = UpdateBeta$f_jhi_nc
+      }
+      
+      ## Now do it for those without a feature and scan each exposure to make sure all are sampled
+      
+      NonZero = which(apply(tempZeta, 2, sum) > 0)
+      WhichZero = which(apply(tempZeta, 2, sum) == 0)
+      
+      if (length(WhichZero) > 0) {
+        randOrd = sample(1:p, max(2, ceiling(p/5)), replace=FALSE)
+        for (jj in 1:ceiling(length(randOrd)/2)) {
+          
+          groups = randOrd[((jj-1)*2 + 1) : min((jj*2), p)]
+          
+          if (length(groups) == 2) {
+            UpdateBeta = UpdateBetaTwo(tempZeta=tempZeta, f_jhi_nc=f_jhi[nc,,],
+                                       betaC = betaCPost[nc,ni-1,], sigmaP=sigmaPost[nc,ni],
+                                       tau=tauPost[nc,ni,], k=k, sigB=sigB, Xstar=Xstar,
+                                       tempBeta = tempBeta, h=WhichZero[1], designC=designC, ns=ns,
+                                       groups=groups, intMax=intMax) 
+          } else {
+            UpdateBeta = UpdateBetaOne(tempZeta=tempZeta, f_jhi_nc=f_jhi[nc,,],
+                                       betaC = betaCPost[nc,ni-1,], sigmaP=sigmaPost[nc,ni],
+                                       tau=tauPost[nc,ni,], k=k, sigB=sigB, Xstar=Xstar,
+                                       tempBeta = tempBeta, h=WhichZero[1], designC=designC, ns=ns,
+                                       groups=groups, intMax=intMax)
+          }
+          
+          tempZeta = UpdateBeta$zeta
+          tempBeta = UpdateBeta$beta
+          f_jhi[nc,,] = UpdateBeta$f_jhi_nc
+        }
       }
       
       betaList[[ni]][[nc]] = tempBeta
@@ -2294,7 +2343,7 @@ MCMCmixture = function(Y, X, C, Xstar, nChains = 2, nIter = 30000, nBurn = 10000
 
 MCMCmixtureEB = function(Y, X, C, Xstar, nChains = 2, nIter = 30000, nBurn = 10000, thin = 20,
                          c = 0.001, d = 0.001, sigBstart, muB, SigmaC, muC,
-                         k = 10, ns = 4, alph, gamm, probSamp1=1, SigMin = 0.1) {
+                         k = 10, ns = 4, alph, gamm, probSamp1=1, SigMin = 0.1, intMax=3) {
   
   designC = cbind(rep(1,n), C)
   
@@ -2378,27 +2427,69 @@ MCMCmixtureEB = function(Y, X, C, Xstar, nChains = 2, nIter = 30000, nBurn = 100
                                  gammaPost[nc,ni] + sum(1 - zetaPost[nc,ni-1,,h]))
       }
       
+      ## First update zeta and beta for those columns already with a feature
       tempZeta = zetaPost[nc,ni-1,,]
       tempBeta = betaList[[ni-1]][[nc]]
-      for (h in 1 : k) {
-        
-        OneOrTwo = sample(1:2, 1, p=c(probSamp1, 1-probSamp1), replace=FALSE)
-        
-        if (OneOrTwo == 1) {
-          UpdateBeta = UpdateBetaOne(tempZeta=tempZeta, f_jhi_nc=f_jhi[nc,,],
-                                     betaC = betaCPost[nc,ni-1,], sigmaP=sigmaPost[nc,ni],
-                                     tau=tauPost[nc,ni,], k=k, sigB=sigB, Xstar=Xstar,
-                                     tempBeta = tempBeta, h=h, designC=designC, ns=ns)
-        } else {
-          UpdateBeta = UpdateBetaTwo(tempZeta=tempZeta, f_jhi_nc=f_jhi[nc,,],
-                                     betaC = betaCPost[nc,ni-1,], sigmaP=sigmaPost[nc,ni],
-                                     tau=tauPost[nc,ni,], k=k, sigB=sigB, Xstar=Xstar,
-                                     tempBeta = tempBeta, h=h, designC=designC, ns=ns)
+      
+      NonZero = which(apply(tempZeta, 2, sum) > 0)
+      WhichZero = which(apply(tempZeta, 2, sum) == 0)
+      
+      if (length(NonZero) > 0) {
+        for (h in NonZero) {
+          
+          OneOrTwo = sample(1:2, 1, p=c(probSamp1, 1-probSamp1), replace=FALSE)
+          
+          if (OneOrTwo == 1) {
+            groups = sample(1:p, 1)
+            UpdateBeta = UpdateBetaOne(tempZeta=tempZeta, f_jhi_nc=f_jhi[nc,,],
+                                       betaC = betaCPost[nc,ni-1,], sigmaP=sigmaPost[nc,ni],
+                                       tau=tauPost[nc,ni,], k=k, sigB=sigB, Xstar=Xstar,
+                                       tempBeta = tempBeta, h=h, designC=designC, ns=ns,
+                                       groups=groups, intMax=intMax)
+          } else {
+            groups = sample(1:p, 2, replace=FALSE)
+            UpdateBeta = UpdateBetaTwo(tempZeta=tempZeta, f_jhi_nc=f_jhi[nc,,],
+                                       betaC = betaCPost[nc,ni-1,], sigmaP=sigmaPost[nc,ni],
+                                       tau=tauPost[nc,ni,], k=k, sigB=sigB, Xstar=Xstar,
+                                       tempBeta = tempBeta, h=h, designC=designC, ns=ns,
+                                       groups=groups, intMax=intMax)
+          }
+          
+          tempZeta = UpdateBeta$zeta
+          tempBeta = UpdateBeta$beta
+          f_jhi[nc,,] = UpdateBeta$f_jhi_nc
         }
-        
-        tempZeta = UpdateBeta$zeta
-        tempBeta = UpdateBeta$beta
-        f_jhi[nc,,] = UpdateBeta$f_jhi_nc
+      }
+      
+      ## Now do it for those without a feature and scan each exposure to make sure all are sampled
+      
+      NonZero = which(apply(tempZeta, 2, sum) > 0)
+      WhichZero = which(apply(tempZeta, 2, sum) == 0)
+      
+      if (length(WhichZero) > 0) {
+        randOrd = sample(1:p, max(2, ceiling(p/5)), replace=FALSE)
+        for (jj in 1:ceiling(length(randOrd)/2)) {
+          
+          groups = randOrd[((jj-1)*2 + 1) : min((jj*2), p)]
+          
+          if (length(groups) == 2) {
+            UpdateBeta = UpdateBetaTwo(tempZeta=tempZeta, f_jhi_nc=f_jhi[nc,,],
+                                       betaC = betaCPost[nc,ni-1,], sigmaP=sigmaPost[nc,ni],
+                                       tau=tauPost[nc,ni,], k=k, sigB=sigB, Xstar=Xstar,
+                                       tempBeta = tempBeta, h=WhichZero[1], designC=designC, ns=ns,
+                                       groups=groups, intMax=intMax) 
+          } else {
+            UpdateBeta = UpdateBetaOne(tempZeta=tempZeta, f_jhi_nc=f_jhi[nc,,],
+                                       betaC = betaCPost[nc,ni-1,], sigmaP=sigmaPost[nc,ni],
+                                       tau=tauPost[nc,ni,], k=k, sigB=sigB, Xstar=Xstar,
+                                       tempBeta = tempBeta, h=WhichZero[1], designC=designC, ns=ns,
+                                       groups=groups, intMax=intMax)
+          }
+          
+          tempZeta = UpdateBeta$zeta
+          tempBeta = UpdateBeta$beta
+          f_jhi[nc,,] = UpdateBeta$f_jhi_nc
+        }
       }
       
       betaList[[ni]][[nc]] = tempBeta
@@ -2454,7 +2545,7 @@ MCMCmixtureEB = function(Y, X, C, Xstar, nChains = 2, nIter = 30000, nBurn = 100
       
       
       zetaPost[nc,ni,,] = tempZeta
-
+      
       
       if (ni %% 50 == 0) {
         sumsB = 0
