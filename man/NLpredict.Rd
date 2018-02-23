@@ -44,6 +44,11 @@ Y = 5 + C + TrueH(X) + rnorm(n)
 
 NLmod = NLint(Y=Y, X=X, C=C)
 
-predictions = NLpredict(NLmod = NLmod, X=X, Xnew=Xnew, Cnew=Cnew)
+Xnew = matrix(rnorm(200*p), 200, p)
+Cnew = rnorm(200)
+
+predictions = NLpredict(NLmod=NLmod,
+                        X=X, Xnew=Xnew,
+                        Cnew=Cnew)
 }
 

@@ -6,7 +6,7 @@
 \usage{
 NLint(Y = Y, X = X, C = C, nChains = 2, nIter = 10000, nBurn = 2000,
   thin = 8, c = 0.001, d = 0.001, sigB = "EB", k = 15, ns = 3,
-  alph = 3, gamm = dim(X)[2], probSamp1 = 0.9, threshold = 0.1)
+  alph = 3, gamm = dim(X)[2], threshold = 0.1, intMax = 3)
 }
 \arguments{
 \item{Y}{The outcome to be analyzed.}
@@ -42,16 +42,14 @@ in a given component}
 \item{gamm}{The second hyperparameter for the beta prior on the probability of an exposure being included
 in a given component}
 
-\item{probSamp1}{The proportion of the time the MCMC updates one variable at a time for each component as opposed to
-two at a time. We have found that sampling one at a time is faster computationally, but we don't 
-recommend probSamp1 = 1, because it is possible for some interactions to be significant without 
-their main effects being significant, and these associations are much easier to pick up 2 at a time}
-
 \item{threshold}{thresholding parameter when finding the lower bound for the slab variance. This parameter represents
 the percentage of time a null association enters the model when tau_h = 0.5. Smaller values are more
 conservative and prevent false discoveries. We recommend either 0.25 or 0.1. This lower bound is only
 calculated if the "EB" option is selected, as it is used to make sure the empirical Bayes variance isn't
 too small}
+
+\item{intMax}{The highest order interaction the user wants to allow in the model. This can be set to p to allow
+any order interaction, though the default is 3.}
 
 \item{nScans}{The number of MCMC scans to run.}
 }
