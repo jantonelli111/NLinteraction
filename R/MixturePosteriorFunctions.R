@@ -65,7 +65,7 @@ PredictionsMixture = function(XstarOld, XstarNew, designC, totalScans, nChains, 
   return(list(PredictedPost = PredictedPost, hHatPost = hHatPost))
 }
 
-WaicMixture = function(Xstar, designC, totalScans, nChains, zetaPost, 
+WaicMixture = function(Y, Xstar, designC, totalScans, nChains, zetaPost, 
                                      betaList, betaCPost, sigmaPost, n, k, ns) {
   LPost = array(NA, dim=c(nChains, totalScans, n))
   counter = 1

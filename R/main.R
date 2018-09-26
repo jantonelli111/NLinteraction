@@ -81,6 +81,9 @@ NLint = function(Y=Y, X=X, C=C, nChains = 2, nIter = 10000,
                  sigB="EB", k = 15, ns = 3, alph=3, gamm=dim(X)[2], 
                  threshold = 0.1, intMax=3) {
   
+  n = dim(X)[1]
+  p = dim(X)[2]
+  
   designC = cbind(rep(1, dim(X)[1]), C)
   
   SigmaC = 1000*diag(dim(designC)[2])
@@ -129,7 +132,7 @@ NLint = function(Y=Y, X=X, C=C, nChains = 2, nIter = 10000,
   keep = nBurn + (1:floor((nIter - nBurn) / thin))*thin
   totalScans = length(keep)
   
-  waic = WaicMixture(Xstar=Xstar, designC=designC, totalScans=totalScans, 
+  waic = WaicMixture(Y=Y, Xstar=Xstar, designC=designC, totalScans=totalScans, 
                      nChains=nChains, zetaPost = posterior$zeta, 
                      betaList = posterior$beta, betaCPost = posterior$betaC, 
                      sigmaPost = posterior$sigma, n=n, k=k, ns=ns)
@@ -270,6 +273,9 @@ InteractionProb = function(NLmod, Xsub) {
 
 NLpredict = function(NLmod=NLmod, X=X, Xnew=Xnew, 
                      Cnew=Cnew) {
+  
+  n = dim(X)[1]
+  p = dim(X)[2]
   
   ns = NLmod$ns
   k = NLmod$k

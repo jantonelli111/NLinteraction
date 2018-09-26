@@ -43,4 +43,3 @@ NLmod = NLint(Y=Y, X=X, C=C)
 ## Find 2 way interaction probability between exposure 4 and 5
 InteractionProb(NLmod=NLmod, Xsub=c(4,5))
 }
-

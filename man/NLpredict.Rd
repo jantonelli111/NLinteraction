@@ -51,4 +51,3 @@ predictions = NLpredict(NLmod=NLmod,
                         X=X, Xnew=Xnew,
                         Cnew=Cnew)
 }
-

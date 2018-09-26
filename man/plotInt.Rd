@@ -35,4 +35,3 @@ NLmod = NLint(Y=Y, X=X, C=C)
 
 plotInt(NLmod = NLmod)
 }
-

@@ -65,4 +65,3 @@ par(mfrow=c(1,2), pty='s')
 plotSurface2d(NLmod = NLmod, X=X, C=C, j1=4, j2=5,
               gridLength_j1=20, gridLength_j2 = 20, quantile_rest = 0.5)
 }
-

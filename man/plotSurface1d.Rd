@@ -62,4 +62,3 @@ plotSurface1d(NLmod = NLmod, X=X, C=C, j1=4, j2=5,
 plotSurface1d(NLmod = NLmod, X=X, C=C, j1=4, j2=5,
               gridLength=30, quantile_j2=0.8, quantile_rest = 0.5)
 }
-

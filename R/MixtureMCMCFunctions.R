@@ -41,9 +41,11 @@ ActivePred = function(zeta, k) {
   return(active)
 }
 
-UpdateBetaOne = function(tempZeta, f_jhi_nc, betaC,
+UpdateBetaOne = function(Y, tempZeta, f_jhi_nc, betaC,
                          sigmaP, tau, k, sigB, Xstar, tempBeta, h,
                          designC, ns, groups, intMax) {
+  
+  n = dim(designC)[1]
   
   activeZ = ActivePred(tempZeta, k=k)
   numZero = length(which(apply(tempZeta[,-h], 2, sum) == 0))
@@ -616,9 +618,11 @@ UpdateBetaOne = function(tempZeta, f_jhi_nc, betaC,
 }
 
 
-UpdateBetaTwo = function(tempZeta, f_jhi_nc, betaC,
+UpdateBetaTwo = function(Y, tempZeta, f_jhi_nc, betaC,
                          sigmaP, tau, k, sigB, Xstar, tempBeta, h,
                          designC, ns, groups, intMax) {
+  
+  n = dim(designC)[1]
   
   activeZ = ActivePred(tempZeta, k=k)
   numZero = length(which(apply(tempZeta[,-h], 2, sum) == 0))
@@ -2115,12 +2119,12 @@ UpdateBetaTwo = function(tempZeta, f_jhi_nc, betaC,
 MCMCmixture = function(Y, X, C, Xstar, nChains = 2, nIter = 30000, nBurn = 10000, thin = 20,
                        c = 0.001, d = 0.001, sigB, muB, SigmaC, muC,
                        k = 10, ns = 3, alph, gamm, intMax=3) {
-  
-  probSamp1 = 0.95
-  designC = cbind(rep(1,n), C)
-  
   n = dim(X)[1]
   p = dim(X)[2]
+    
+  probSamp1 = 0.95
+  designC = cbind(rep(1,n), C)
+
   pc = dim(designC)[2] - 1
   
   zetaPost = array(NA, dim=c(nChains, nIter, p, k))
@@ -2211,14 +2215,14 @@ MCMCmixture = function(Y, X, C, Xstar, nChains = 2, nIter = 30000, nBurn = 10000
           
           if (OneOrTwo == 1) {
             groups = sample(1:p, 1)
-            UpdateBeta = UpdateBetaOne(tempZeta=tempZeta, f_jhi_nc=f_jhi[nc,,],
+            UpdateBeta = UpdateBetaOne(Y=Y, tempZeta=tempZeta, f_jhi_nc=f_jhi[nc,,],
                                        betaC = betaCPost[nc,ni-1,], sigmaP=sigmaPost[nc,ni],
                                        tau=tauPost[nc,ni,], k=k, sigB=sigB, Xstar=Xstar,
                                        tempBeta = tempBeta, h=h, designC=designC, ns=ns,
                                        groups=groups, intMax=intMax)
           } else {
             groups = sample(1:p, 2, replace=FALSE)
-            UpdateBeta = UpdateBetaTwo(tempZeta=tempZeta, f_jhi_nc=f_jhi[nc,,],
+            UpdateBeta = UpdateBetaTwo(Y=Y, tempZeta=tempZeta, f_jhi_nc=f_jhi[nc,,],
                                        betaC = betaCPost[nc,ni-1,], sigmaP=sigmaPost[nc,ni],
                                        tau=tauPost[nc,ni,], k=k, sigB=sigB, Xstar=Xstar,
                                        tempBeta = tempBeta, h=h, designC=designC, ns=ns,
@@ -2240,16 +2244,16 @@ MCMCmixture = function(Y, X, C, Xstar, nChains = 2, nIter = 30000, nBurn = 10000
         randOrd = sample(1:p, max(2, ceiling(p/5)), replace=FALSE)
         for (jj in 1:ceiling(length(randOrd)/2)) {
           
-          groups = randOrd[((jj-1)*2 + 1) : min((jj*2), p)]
+          groups = randOrd[((jj-1)*2 + 1) : min((jj*2), length(randOrd))]
           
           if (length(groups) == 2) {
-            UpdateBeta = UpdateBetaTwo(tempZeta=tempZeta, f_jhi_nc=f_jhi[nc,,],
+            UpdateBeta = UpdateBetaTwo(Y=Y, tempZeta=tempZeta, f_jhi_nc=f_jhi[nc,,],
                                        betaC = betaCPost[nc,ni-1,], sigmaP=sigmaPost[nc,ni],
                                        tau=tauPost[nc,ni,], k=k, sigB=sigB, Xstar=Xstar,
                                        tempBeta = tempBeta, h=WhichZero[1], designC=designC, ns=ns,
                                        groups=groups, intMax=intMax) 
           } else {
-            UpdateBeta = UpdateBetaOne(tempZeta=tempZeta, f_jhi_nc=f_jhi[nc,,],
+            UpdateBeta = UpdateBetaOne(Y=Y, tempZeta=tempZeta, f_jhi_nc=f_jhi[nc,,],
                                        betaC = betaCPost[nc,ni-1,], sigmaP=sigmaPost[nc,ni],
                                        tau=tauPost[nc,ni,], k=k, sigB=sigB, Xstar=Xstar,
                                        tempBeta = tempBeta, h=WhichZero[1], designC=designC, ns=ns,
@@ -2345,10 +2349,11 @@ MCMCmixtureEB = function(Y, X, C, Xstar, nChains = 2, nIter = 30000, nBurn = 100
                          c = 0.001, d = 0.001, sigBstart, muB, SigmaC, muC,
                          k = 10, ns = 4, alph, gamm, probSamp1=1, SigMin = 0.1, intMax=3) {
   
-  designC = cbind(rep(1,n), C)
-  
   n = dim(X)[1]
   p = dim(X)[2]
+  
+  designC = cbind(rep(1,n), C)
+  
   pc = dim(designC)[2] - 1
   
   zetaPost = array(NA, dim=c(nChains, nIter, p, k))
@@ -2441,14 +2446,14 @@ MCMCmixtureEB = function(Y, X, C, Xstar, nChains = 2, nIter = 30000, nBurn = 100
           
           if (OneOrTwo == 1) {
             groups = sample(1:p, 1)
-            UpdateBeta = UpdateBetaOne(tempZeta=tempZeta, f_jhi_nc=f_jhi[nc,,],
+            UpdateBeta = UpdateBetaOne(Y=Y, tempZeta=tempZeta, f_jhi_nc=f_jhi[nc,,],
                                        betaC = betaCPost[nc,ni-1,], sigmaP=sigmaPost[nc,ni],
                                        tau=tauPost[nc,ni,], k=k, sigB=sigB, Xstar=Xstar,
                                        tempBeta = tempBeta, h=h, designC=designC, ns=ns,
                                        groups=groups, intMax=intMax)
           } else {
             groups = sample(1:p, 2, replace=FALSE)
-            UpdateBeta = UpdateBetaTwo(tempZeta=tempZeta, f_jhi_nc=f_jhi[nc,,],
+            UpdateBeta = UpdateBetaTwo(Y=Y, tempZeta=tempZeta, f_jhi_nc=f_jhi[nc,,],
                                        betaC = betaCPost[nc,ni-1,], sigmaP=sigmaPost[nc,ni],
                                        tau=tauPost[nc,ni,], k=k, sigB=sigB, Xstar=Xstar,
                                        tempBeta = tempBeta, h=h, designC=designC, ns=ns,
@@ -2470,16 +2475,16 @@ MCMCmixtureEB = function(Y, X, C, Xstar, nChains = 2, nIter = 30000, nBurn = 100
         randOrd = sample(1:p, max(2, ceiling(p/5)), replace=FALSE)
         for (jj in 1:ceiling(length(randOrd)/2)) {
           
-          groups = randOrd[((jj-1)*2 + 1) : min((jj*2), p)]
+          groups = randOrd[((jj-1)*2 + 1) : min((jj*2), length(randOrd))]
           
           if (length(groups) == 2) {
-            UpdateBeta = UpdateBetaTwo(tempZeta=tempZeta, f_jhi_nc=f_jhi[nc,,],
+            UpdateBeta = UpdateBetaTwo(Y=Y, tempZeta=tempZeta, f_jhi_nc=f_jhi[nc,,],
                                        betaC = betaCPost[nc,ni-1,], sigmaP=sigmaPost[nc,ni],
                                        tau=tauPost[nc,ni,], k=k, sigB=sigB, Xstar=Xstar,
                                        tempBeta = tempBeta, h=WhichZero[1], designC=designC, ns=ns,
                                        groups=groups, intMax=intMax) 
           } else {
-            UpdateBeta = UpdateBetaOne(tempZeta=tempZeta, f_jhi_nc=f_jhi[nc,,],
+            UpdateBeta = UpdateBetaOne(Y=Y, tempZeta=tempZeta, f_jhi_nc=f_jhi[nc,,],
                                        betaC = betaCPost[nc,ni-1,], sigmaP=sigmaPost[nc,ni],
                                        tau=tauPost[nc,ni,], k=k, sigB=sigB, Xstar=Xstar,
                                        tempBeta = tempBeta, h=WhichZero[1], designC=designC, ns=ns,
@@ -2587,6 +2592,9 @@ MCMCmixtureEB = function(Y, X, C, Xstar, nChains = 2, nIter = 30000, nBurn = 100
 MCMCmixtureMinSig = function(Y, X, C, Xstar, nPerms = 10, nIter = 500,
                              c = 0.001, d = 0.001, sigBstart = 1, muB, SigmaC, muC,
                              k = 10, ns = 2, threshold=0.25) {
+  
+  n = dim(X)[1]
+  p = dim(X)[2]
   
   Ysave = Y
   sigSave = rep(NA, nPerms)
