@@ -1,6 +1,6 @@
 # NLinteraction
 
-This is an R package to implement the ideas in Antonelli et. al (2018), which can be found at the following link:
+This is an R package to implement the ideas in Antonelli et. al (2018) to estimate the effects of environmental mixtures that allows for interactions of any order among the interactions. More details can be found at the following link:
 
 https://arxiv.org/pdf/1711.11239.pdf
 
