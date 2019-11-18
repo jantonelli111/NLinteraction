@@ -355,7 +355,7 @@ NLpredict = function(NLmod=NLmod, X=X, Xnew=Xnew,
   XstarNew = array(NA, dim=c(n2,p,ns+1))
   XstarNew[,,1] = 1
   for (j in 1 : p) {
-    temp_ns_object = ns(X[,j], df=ns)
+    temp_ns_object = splines::ns(X[,j], df=ns)
     temp_means = apply(temp_ns_object, 2, mean)
     temp_sds = apply(temp_ns_object, 2, sd)
     XstarNew[,j,2:(ns+1)] = cbind(t((t(predict(temp_ns_object, 
