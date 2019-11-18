@@ -23,7 +23,6 @@
 #'                       via empirical Bayes. We recommend "EB" unless the user has
 #'                       strong prior beliefs about the magnitude of the nonzero regression
 #'                       coefficients
-#'                       
 #' @param k              The number of total components to allow in the model
 #' @param ns             The degrees of freedom of the splines used to estimate nonlinear functions of the exposures
 #' @param alph           The first hyperparameter for the beta prior on the probability of an exposure being included
@@ -32,13 +31,15 @@
 #'                       in a given component
 #' @param intMax         The highest order interaction the user wants to allow in the model. This can be set to p to allow
 #'                       any order interaction, though the default is 3.
-#'                       
-#'                      
 #' @param threshold      thresholding parameter when finding the lower bound for the slab variance. This parameter represents
 #'                       the percentage of time a null association enters the model when tau_h = 0.5. Smaller values are more
 #'                       conservative and prevent false discoveries. We recommend either 0.25 or 0.1. This lower bound is only
 #'                       calculated if the "EB" option is selected, as it is used to make sure the empirical Bayes variance isn't
-#'                       too small                                                                                                                                                                                             
+#'                       too small 
+#' @param speed          Default is set to speed=TRUE. We have two approaches to sampling from our model. The faster option is
+#'                       approximate, though we have found it gives nearly identical answers in all scenarios explored. The slower
+#'                       option is theoretically guaranteed to sample from the correct target distribution, but can be slower in
+#'                       certain scenarios.                                                                                                                                                                                            
 #'
 #' @return A list containing the full posterior draws of all parameters in the model, 
 #'         the waic associated with the model, the posterior inclusion probabilities (PIPs)
@@ -79,7 +80,7 @@
 NLint = function(Y=Y, X=X, C=C, nChains = 2, nIter = 10000, 
                  nBurn = 2000, thin = 8, c = 0.001, d = 0.001,
                  sigB="EB", k = 15, ns = 3, alph=3, gamm=dim(X)[2], 
-                 threshold = 0.1, intMax=3) {
+                 threshold = 0.1, intMax=3, speed=TRUE) {
   
   n = dim(X)[1]
   p = dim(X)[2]
@@ -99,49 +100,110 @@ NLint = function(Y=Y, X=X, C=C, nChains = 2, nIter = 10000,
     Xstar[,j,2:(ns+1)] = scale(splines::ns(X[,j], df=ns))
   }
   
-
-  ## Empirical Bayes if the user wants to use it
-  if (sigB == "EB") {
-    SigMin = MCMCmixtureMinSig(Y=Y, X=X, C=C, Xstar = Xstar, nPerms = 10, 
-                               nIter = 500, c = c, d = d,
+  if (speed == TRUE) {
+    
+    ## Empirical Bayes if the user wants to use it
+    if (sigB == "EB") {
+      SigMin = MCMCmixtureMinSig(Y=Y, X=X, C=C, Xstar = Xstar, nPerms = 10, 
+                                 nIter = 500, c = c, d = d,
+                                 sigBstart=0.5, muB=muB,
+                                 SigmaC=SigmaC, muC=muC, 
+                                 k = k, ns = ns, threshold=threshold)
+      
+      print("Finding the empirical bayes estimate of the slab variance")
+      
+      SigEstEB = MCMCmixtureEB(Y=Y, X=X, C=C, Xstar = Xstar, nChains = nChains, nIter = nIter, 
+                               nBurn = nBurn, thin = thin, c = c, d = d,
                                sigBstart=0.5, muB=muB,
-                               SigmaC=SigmaC, muC=muC, 
-                               k = k, ns = ns, threshold=threshold)
+                               SigmaC=SigmaC, muC=muC, SigMin = SigMin,
+                               k = k, ns = ns, alph=alph, gamm=gamm, intMax=intMax)
+      
+      SigEst = max(SigEstEB, SigMin)
+      
+      print("Now fitting the posterior conditional on EB estimate of slab variance")
+      
+      posterior = MCMCmixture(Y=Y, X=X, C=C, Xstar = Xstar, nChains = nChains, nIter = nIter, 
+                              nBurn = nBurn, thin = thin, c = c, d = d,
+                              sigB=SigEst, muB=muB,
+                              SigmaC=SigmaC, muC=muC, 
+                              k = k, ns = ns, alph=alph, gamm=gamm, intMax=intMax) 
+    } else {
+      print("Fitting the posterior using user selecte value for slab variance")
+      
+      posterior = MCMCmixture(Y=Y, X=X, C=C, Xstar = Xstar, nChains = nChains, nIter = nIter, 
+                              nBurn = nBurn, thin = thin, c = c, d = d,
+                              sigB=sigB, muB=muB,
+                              SigmaC=SigmaC, muC=muC, 
+                              k = k, ns = ns, alph=alph, gamm=gamm, intMax=intMax) 
+    }
     
-    SigEstEB = MCMCmixtureEB(Y=Y, X=X, C=C, Xstar = Xstar, nChains = nChains, nIter = nIter, 
-                             nBurn = nBurn, thin = thin, c = c, d = d,
-                             sigBstart=0.5, muB=muB,
-                             SigmaC=SigmaC, muC=muC, 
-                             k = k, ns = ns, alph=alph, gamm=gamm, intMax=intMax)
+    keep = nBurn + (1:floor((nIter - nBurn) / thin))*thin
+    totalScans = length(keep)
     
-    SigEst = max(SigEstEB, SigMin)
+    waic = WaicMixture(Y=Y, Xstar=Xstar, designC=designC, totalScans=totalScans, 
+                       nChains=nChains, zetaPost = posterior$zeta, 
+                       betaList = posterior$beta, betaCPost = posterior$betaC, 
+                       sigmaPost = posterior$sigma, n=n, k=k, ns=ns)
     
-    posterior = MCMCmixture(Y=Y, X=X, C=C, Xstar = Xstar, nChains = nChains, nIter = nIter, 
-                            nBurn = nBurn, thin = thin, c = c, d = d,
-                            sigB=SigEst, muB=muB,
-                            SigmaC=SigmaC, muC=muC, 
-                            k = k, ns = ns, alph=alph, gamm=gamm, intMax=intMax) 
+    intMean = InteractionMatrix(zetaPost = posterior$zeta, totalScans = totalScans,
+                                nChains = 2, p = p, k = k)
+    
+    inclusions = InclusionVector(zetaPost = posterior$zeta, totalScans = totalScans,
+                                 nChains = 2, p = p, k = k)
+    
   } else {
-    posterior = MCMCmixture(Y=Y, X=X, C=C, Xstar = Xstar, nChains = nChains, nIter = nIter, 
-                            nBurn = nBurn, thin = thin, c = c, d = d,
-                            sigB=sigB, muB=muB,
-                            SigmaC=SigmaC, muC=muC, 
-                            k = k, ns = ns, alph=alph, gamm=gamm, intMax=intMax) 
-  }
-  
-  keep = nBurn + (1:floor((nIter - nBurn) / thin))*thin
-  totalScans = length(keep)
-  
-  waic = WaicMixture(Y=Y, Xstar=Xstar, designC=designC, totalScans=totalScans, 
-                     nChains=nChains, zetaPost = posterior$zeta, 
-                     betaList = posterior$beta, betaCPost = posterior$betaC, 
-                     sigmaPost = posterior$sigma, n=n, k=k, ns=ns)
-  
-  intMean = InteractionMatrix(zetaPost = posterior$zeta, totalScans = totalScans,
-                                    nChains = 2, p = p, k = k)
+    
+    ## Empirical Bayes if the user wants to use it
+    if (sigB == "EB") {
+      SigMin = MCMCmixtureMinSig_MH(Y=Y, X=X, C=C, Xstar = Xstar, nPerms = 10, 
+                                 nIter = 500, c = c, d = d,
+                                 sigBstart=0.5, muB=muB,
+                                 SigmaC=SigmaC, muC=muC, 
+                                 k = k, ns = ns, threshold=threshold)
+      
+      print("Finding the empirical bayes estimate of the slab variance")
+      
+      SigEstEB = MCMCmixtureEB_MH(Y=Y, X=X, C=C, Xstar = Xstar, nChains = nChains, nIter = nIter,
+                                  nBurn = nBurn, thin = thin, c = c, d = d,
+                                  sigBstart=0.5, muB=muB,
+                                  SigmaC=SigmaC, muC=muC,
+                                  k = k, ns = ns, alph=alph, gamm=gamm,
+                                  SigMin = SigMin, probSamp1 = 0.95, intMax=intMax)
+      
+      SigEst = max(SigEstEB, SigMin)
+      
+      print("Now fitting the posterior conditional on EB estimate of slab variance")
+      
+      posterior = MCMCmixture_MH(Y=Y, X=X, C=C, Xstar = Xstar, nChains = nChains, nIter = nIter,
+                                 nBurn = nBurn, thin = thin, c = c, d = d,
+                                 sigB=SigEst, muB=muB,
+                                 SigmaC=SigmaC, muC=muC, intMax=intMax,
+                                 k = k, ns = ns, alph=alph, gamm=gamm, probSamp1=0.95) 
 
-  inclusions = InclusionVector(zetaPost = posterior$zeta, totalScans = totalScans,
-                                    nChains = 2, p = p, k = k)
+    } else {
+      print("Fitting the posterior using user selecte value for slab variance")
+      
+      posterior = MCMCmixture_MH(Y=Y, X=X, C=C, Xstar = Xstar, nChains = nChains, nIter = nIter,
+                                 nBurn = nBurn, thin = thin, c = c, d = d,
+                                 sigB=sigB, muB=muB,
+                                 SigmaC=SigmaC, muC=muC, intMax=intMax,
+                                 k = k, ns = ns, alph=alph, gamm=gamm, probSamp1=0.95) 
+    }
+    
+    keep = nBurn + (1:floor((nIter - nBurn) / thin))*thin
+    totalScans = length(keep)
+    
+    waic = WaicMixture_MH(Y=Y, Xstar=Xstar, designC=designC, totalScans=totalScans, 
+                       nChains=nChains, zetaPost = posterior$zeta, 
+                       betaList = posterior$beta, betaCPost = posterior$betaC, 
+                       sigmaPost = posterior$sigma, n=n, k=k, ns=ns)
+    
+    intMean = InteractionMatrix_MH(zetaPost = posterior$zeta, totalScans = totalScans,
+                                nChains = 2, p = p, k = k)
+    
+    inclusions = InclusionVector_MH(zetaPost = posterior$zeta, totalScans = totalScans,
+                                 nChains = 2, p = p, k = k)
+  }
   
   
   l = list(posterior = posterior,
@@ -149,7 +211,8 @@ NLint = function(Y=Y, X=X, C=C, nChains = 2, nIter = 10000,
            InteractionPIP = intMean,
            MainPIP = inclusions,
            ns = ns,
-           k = k)
+           k = k,
+           speed = speed)
   return(l)
 }
 
@@ -299,12 +362,23 @@ NLpredict = function(NLmod=NLmod, X=X, Xnew=Xnew,
                                                Xnew[,j])) - temp_means) / temp_sds))
   }
   
-  predictions = PredictionsMixture(XstarOld=Xstar, XstarNew=XstarNew, 
-                     designC=designC, totalScans=dim(NLmod$posterior$zeta)[2], 
-                     nChains=dim(NLmod$posterior$zeta)[1], 
-                     zetaPost=NLmod$posterior$zeta, 
-                     betaList=NLmod$posterior$beta, 
-                     betaCPost=NLmod$posterior$betaC, k=k, ns=ns)
+  if (NLmod$speed == TRUE) {
+    
+    predictions = PredictionsMixture(XstarOld=Xstar, XstarNew=XstarNew, 
+                                     designC=designC, totalScans=dim(NLmod$posterior$zeta)[2], 
+                                     nChains=dim(NLmod$posterior$zeta)[1], 
+                                     zetaPost=NLmod$posterior$zeta, 
+                                     betaList=NLmod$posterior$beta, 
+                                     betaCPost=NLmod$posterior$betaC, k=k, ns=ns)
+  } else {
+    predictions = PredictionsMixture_MH(XstarOld = Xstar, XstarNew = XstarNew, designC = designC,
+                                     totalScans = dim(NLmod$posterior$zeta)[2], 
+                                     nChains = dim(NLmod$posterior$zeta)[1],
+                                     zetaPost=NLmod$posterior$zeta, 
+                                     betaList=NLmod$posterior$beta, 
+                                     betaCPost = NLmod$posterior$betaC, k=k,
+                                     ns=ns)
+  }
   
   
   l = list(mean = apply(predictions$PredictedPost, 3, mean, na.rm=TRUE),

@@ -2178,7 +2178,9 @@ MCMCmixture = function(Y, X, C, Xstar, nChains = 2, nIter = 30000, nBurn = 10000
         betaList[[ni]][[nc]][[h]] = c(0)
       }
       
-      if(ni %% 100 == 0 & nc == 1) print(ni)
+      if(ni %% 100 == 0 & nc == 1)  {
+        print(paste(ni, " MCMC scans have finished", sep=""))
+      }
       
       alphaPost[nc,ni] = alph
       gammaPost[nc,ni] = gamm
@@ -2333,9 +2335,7 @@ MCMCmixture = function(Y, X, C, Xstar, nChains = 2, nIter = 30000, nBurn = 10000
   
   keep = nBurn + (1:floor((nIter - nBurn) / thin))*thin
   
-  posterior = list(alpha = alphaPost[,keep],
-                   gamma = gammaPost[,keep],
-                   sigma = sigmaPost[,keep],
+  posterior = list(sigma = sigmaPost[,keep],
                    tau = tauPost[,keep,],
                    zeta = zetaPost[,keep,,],
                    beta = betaList[keep],
@@ -2410,7 +2410,9 @@ MCMCmixtureEB = function(Y, X, C, Xstar, nChains = 2, nIter = 30000, nBurn = 100
         betaList[[ni]][[nc]][[h]] = c(0)
       }
       
-      if(ni %% 100 == 0 & nc == 1) print(ni)
+      if(ni %% 100 == 0 & nc == 1)  {
+        print(paste(ni, " MCMC scans have finished", sep=""))
+      }
       
       alphaPost[nc,ni] = alph
       gammaPost[nc,ni] = gamm

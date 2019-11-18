@@ -110,15 +110,28 @@ plotSurface1d = function(NLmod, X, C, j1, j2, gridLength = 100,
     Xstar[,j,2:(ns+1)] = scale(splines::ns(X[,j], df=ns))
   }
   
-  PlotInteraction(j1=j1, j2=j2, X=X, Xstar=Xstar, 
-                  C=C, quantile_j2=quantile_j2, 
-                  quantile_rest=quantile_rest, 
-                  ns=ns, gridLength=gridLength, p=p, 
-                  zetaPost=NLmod$posterior$zeta, 
-                  betaList=NLmod$posterior$beta, 
-                  betaCPost=NLmod$posterior$betaC, 
-                  totalScans=dim(NLmod$posterior$betaC)[2], 
-                  nChains=dim(NLmod$posterior$betaC)[1], k=k,...)
+  if (NLmod$speed == TRUE) {
+    
+    PlotInteraction(j1=j1, j2=j2, X=X, Xstar=Xstar, 
+                    C=C, quantile_j2=quantile_j2, 
+                    quantile_rest=quantile_rest, 
+                    ns=ns, gridLength=gridLength, p=p, 
+                    zetaPost=NLmod$posterior$zeta, 
+                    betaList=NLmod$posterior$beta, 
+                    betaCPost=NLmod$posterior$betaC, 
+                    totalScans=dim(NLmod$posterior$betaC)[2], 
+                    nChains=dim(NLmod$posterior$betaC)[1], k=k,...)
+  } else {
+    PlotInteraction_MH(j1=j1, j2=j2, X=X, Xstar=Xstar, 
+                    C=C, quantile_j2=quantile_j2, 
+                    quantile_rest=quantile_rest, 
+                    ns=ns, gridLength=gridLength, p=p, 
+                    zetaPost=NLmod$posterior$zeta, 
+                    betaList=NLmod$posterior$beta, 
+                    betaCPost=NLmod$posterior$betaC, 
+                    totalScans=dim(NLmod$posterior$betaC)[2], 
+                    nChains=dim(NLmod$posterior$betaC)[1], k=k,...)
+  }
   
 }
 
@@ -195,15 +208,28 @@ plotSurface2d = function(NLmod, X, C, j1, j2, gridLength_j1 = 20,
   grid_j1 = seq(quantile(X[,j1], .025), quantile(X[,j1], .975), length=gridLength_j1)
   grid_j2 = seq(quantile(X[,j2], .025), quantile(X[,j2], .975), length=gridLength_j2)
   
-  PlotInteractionHeatmapMeanSD(j1=j1, j2=j2, X=X, Xstar=Xstar,
-                  C=C, grid_j1=grid_j1, grid_j2=grid_j2,
-                  quantile_rest=quantile_rest,
-                  ns=ns, p=p, minDist=minDist,
-                  zetaPost=NLmod$posterior$zeta, 
-                  betaList=NLmod$posterior$beta, 
-                  betaCPost=NLmod$posterior$betaC, 
-                  totalScans=dim(NLmod$posterior$betaC)[2], 
-                  nChains=dim(NLmod$posterior$betaC)[1], k=k,...)
+  if (NLmod$speed == TRUE) {
+    
+    PlotInteractionHeatmapMeanSD(j1=j1, j2=j2, X=X, Xstar=Xstar,
+                                 C=C, grid_j1=grid_j1, grid_j2=grid_j2,
+                                 quantile_rest=quantile_rest,
+                                 ns=ns, p=p, minDist=minDist,
+                                 zetaPost=NLmod$posterior$zeta, 
+                                 betaList=NLmod$posterior$beta, 
+                                 betaCPost=NLmod$posterior$betaC, 
+                                 totalScans=dim(NLmod$posterior$betaC)[2], 
+                                 nChains=dim(NLmod$posterior$betaC)[1], k=k,...)
+  } else {
+    PlotInteractionHeatmapMeanSD_MH(j1=j1, j2=j2, X=X, Xstar=Xstar,
+                                    C=C, grid_j1=grid_j1, grid_j2=grid_j2,
+                                    quantile_rest=quantile_rest,
+                                    ns=ns, p=p, minDist=minDist,
+                                    zetaPost=NLmod$posterior$zeta, 
+                                    betaList=NLmod$posterior$beta, 
+                                    betaCPost=NLmod$posterior$betaC, 
+                                    totalScans=dim(NLmod$posterior$betaC)[2], 
+                                    nChains=dim(NLmod$posterior$betaC)[1], k=k,...)
+  }
   
 }
 
@@ -280,15 +306,28 @@ plotSurface2dMean = function(NLmod, X, C, j1, j2, gridLength_j1 = 20,
   grid_j1 = seq(quantile(X[,j1], .025), quantile(X[,j1], .975), length=gridLength_j1)
   grid_j2 = seq(quantile(X[,j2], .025), quantile(X[,j2], .975), length=gridLength_j2)
   
-  PlotInteractionHeatmapMean(j1=j1, j2=j2, X=X, Xstar=Xstar,
-                         C=C, grid_j1=grid_j1, grid_j2=grid_j2,
-                         quantile_rest=quantile_rest,
-                         ns=ns, p=p, minDist=minDist,
-                         zetaPost=NLmod$posterior$zeta, 
-                         betaList=NLmod$posterior$beta, 
-                         betaCPost=NLmod$posterior$betaC, 
-                         totalScans=dim(NLmod$posterior$betaC)[2], 
-                         nChains=dim(NLmod$posterior$betaC)[1], k=k,...)
+  if (NLmod$speed == TRUE) {
+    
+    PlotInteractionHeatmapMean(j1=j1, j2=j2, X=X, Xstar=Xstar,
+                                 C=C, grid_j1=grid_j1, grid_j2=grid_j2,
+                                 quantile_rest=quantile_rest,
+                                 ns=ns, p=p, minDist=minDist,
+                                 zetaPost=NLmod$posterior$zeta, 
+                                 betaList=NLmod$posterior$beta, 
+                                 betaCPost=NLmod$posterior$betaC, 
+                                 totalScans=dim(NLmod$posterior$betaC)[2], 
+                                 nChains=dim(NLmod$posterior$betaC)[1], k=k,...)
+  } else {
+    PlotInteractionHeatmapMean_MH(j1=j1, j2=j2, X=X, Xstar=Xstar,
+                                    C=C, grid_j1=grid_j1, grid_j2=grid_j2,
+                                    quantile_rest=quantile_rest,
+                                    ns=ns, p=p, minDist=minDist,
+                                    zetaPost=NLmod$posterior$zeta, 
+                                    betaList=NLmod$posterior$beta, 
+                                    betaCPost=NLmod$posterior$betaC, 
+                                    totalScans=dim(NLmod$posterior$betaC)[2], 
+                                    nChains=dim(NLmod$posterior$betaC)[1], k=k,...)
+  }
   
 }
 
@@ -366,14 +405,27 @@ plotSurface2dSD = function(NLmod, X, C, j1, j2, gridLength_j1 = 20,
   grid_j1 = seq(quantile(X[,j1], .025), quantile(X[,j1], .975), length=gridLength_j1)
   grid_j2 = seq(quantile(X[,j2], .025), quantile(X[,j2], .975), length=gridLength_j2)
   
-  PlotInteractionHeatmapSD(j1=j1, j2=j2, X=X, Xstar=Xstar,
-                         C=C, grid_j1=grid_j1, grid_j2=grid_j2,
-                         quantile_rest=quantile_rest,
-                         ns=ns, p=p, minDist=minDist,
-                         zetaPost=NLmod$posterior$zeta, 
-                         betaList=NLmod$posterior$beta, 
-                         betaCPost=NLmod$posterior$betaC, 
-                         totalScans=dim(NLmod$posterior$betaC)[2], 
-                         nChains=dim(NLmod$posterior$betaC)[1], k=k,...)
+  if (NLmod$speed == TRUE) {
+    
+    PlotInteractionHeatmapSD(j1=j1, j2=j2, X=X, Xstar=Xstar,
+                                 C=C, grid_j1=grid_j1, grid_j2=grid_j2,
+                                 quantile_rest=quantile_rest,
+                                 ns=ns, p=p, minDist=minDist,
+                                 zetaPost=NLmod$posterior$zeta, 
+                                 betaList=NLmod$posterior$beta, 
+                                 betaCPost=NLmod$posterior$betaC, 
+                                 totalScans=dim(NLmod$posterior$betaC)[2], 
+                                 nChains=dim(NLmod$posterior$betaC)[1], k=k,...)
+  } else {
+    PlotInteractionHeatmapSD_MH(j1=j1, j2=j2, X=X, Xstar=Xstar,
+                                    C=C, grid_j1=grid_j1, grid_j2=grid_j2,
+                                    quantile_rest=quantile_rest,
+                                    ns=ns, p=p, minDist=minDist,
+                                    zetaPost=NLmod$posterior$zeta, 
+                                    betaList=NLmod$posterior$beta, 
+                                    betaCPost=NLmod$posterior$betaC, 
+                                    totalScans=dim(NLmod$posterior$betaC)[2], 
+                                    nChains=dim(NLmod$posterior$betaC)[1], k=k,...)
+  }
   
 }

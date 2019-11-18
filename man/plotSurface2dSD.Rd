@@ -4,8 +4,18 @@
 \alias{plotSurface2dSD}
 \title{Plot standard deviation of bivariate posterior predictive exposure response surface}
 \usage{
-plotSurface2dSD(NLmod, X, C, j1, j2, gridLength_j1 = 20,
-  gridLength_j2 = 20, minDist = Inf, quantile_rest = 0.5, ...)
+plotSurface2dSD(
+  NLmod,
+  X,
+  C,
+  j1,
+  j2,
+  gridLength_j1 = 20,
+  gridLength_j2 = 20,
+  minDist = Inf,
+  quantile_rest = 0.5,
+  ...
+)
 }
 \arguments{
 \item{NLmod}{The fitted model}

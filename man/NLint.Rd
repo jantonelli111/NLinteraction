@@ -4,10 +4,25 @@
 \alias{NLint}
 \title{Estimate nonlinear association and identify interactions}
 \usage{
-NLint(Y = Y, X = X, C = C, nChains = 2, nIter = 10000,
-  nBurn = 2000, thin = 8, c = 0.001, d = 0.001, sigB = "EB",
-  k = 15, ns = 3, alph = 3, gamm = dim(X)[2], threshold = 0.1,
-  intMax = 3)
+NLint(
+  Y = Y,
+  X = X,
+  C = C,
+  nChains = 2,
+  nIter = 10000,
+  nBurn = 2000,
+  thin = 8,
+  c = 0.001,
+  d = 0.001,
+  sigB = "EB",
+  k = 15,
+  ns = 3,
+  alph = 3,
+  gamm = dim(X)[2],
+  threshold = 0.1,
+  intMax = 3,
+  speed = TRUE
+)
 }
 \arguments{
 \item{Y}{The outcome to be analyzed.}
@@ -51,6 +66,11 @@ too small}
 
 \item{intMax}{The highest order interaction the user wants to allow in the model. This can be set to p to allow
 any order interaction, though the default is 3.}
+
+\item{speed}{Default is set to speed=TRUE. We have two approaches to sampling from our model. The faster option is
+approximate, though we have found it gives nearly identical answers in all scenarios explored. The slower
+option is theoretically guaranteed to sample from the correct target distribution, but can be slower in
+certain scenarios.}
 
 \item{nScans}{The number of MCMC scans to run.}
 }

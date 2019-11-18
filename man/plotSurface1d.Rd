@@ -4,8 +4,17 @@
 \alias{plotSurface1d}
 \title{Plot posterior predictive exposure response surface for an exposure}
 \usage{
-plotSurface1d(NLmod, X, C, j1, j2, gridLength = 100, quantile_j2,
-  quantile_rest = 0.5, ...)
+plotSurface1d(
+  NLmod,
+  X,
+  C,
+  j1,
+  j2,
+  gridLength = 100,
+  quantile_j2,
+  quantile_rest = 0.5,
+  ...
+)
 }
 \arguments{
 \item{NLmod}{The fitted model}

@@ -4,8 +4,18 @@
 \alias{plotSurface2dMean}
 \title{Plot mean bivariate posterior predictive exposure response surface}
 \usage{
-plotSurface2dMean(NLmod, X, C, j1, j2, gridLength_j1 = 20,
-  gridLength_j2 = 20, minDist = Inf, quantile_rest = 0.5, ...)
+plotSurface2dMean(
+  NLmod,
+  X,
+  C,
+  j1,
+  j2,
+  gridLength_j1 = 20,
+  gridLength_j2 = 20,
+  minDist = Inf,
+  quantile_rest = 0.5,
+  ...
+)
 }
 \arguments{
 \item{NLmod}{The fitted model}

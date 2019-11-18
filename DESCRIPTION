@@ -10,7 +10,7 @@ License: GPL (>= 2)
 LazyData: TRUE
 URL: https://github.com/jantonelli111/NLinteraction
 BugReports: https://github.com/jantonelli111/NLinteraction/issues
-RoxygenNote: 6.1.0
+RoxygenNote: 7.0.0
 Suggests: 
     knitr,
     rmarkdown,
@@ -24,4 +24,5 @@ Imports:
     fields,
     splines,
     ggplot2,
-    reshape2
+    reshape2,
+    stringr
