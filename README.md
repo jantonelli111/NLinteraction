@@ -1,6 +1,6 @@
 # NLinteraction
 
-This is an R package to implement the ideas in Antonelli et. al (2018), which can be found at the following link:
+This is an R package to implement the ideas in Antonelli et. al (2018) to estimate the effects of environmental mixtures that allows for interactions of any order among the interactions. More details can be found at the following link:
 
 https://arxiv.org/pdf/1711.11239.pdf
 
@@ -135,10 +135,12 @@ plotSurface2dMean(NLmod = NLmod, X=X, C=C, j1=4, j2=5,
               gridLength_j1=20, gridLength_j2 = 20,
               quantile_rest = 0.5, xlab='X4', ylab='X5',
               main="Posterior mean")
+points(X[,4], X[,5], pch=16, cex=0.5)
 plotSurface2dSD(NLmod = NLmod, X=X, C=C, j1=4, j2=5,
                   gridLength_j1=20, gridLength_j2 = 20,
                   quantile_rest = 0.5, xlab='X4', ylab='X5',
                   main="Posterior SD")
+points(X[,4], X[,5], pch=16, cex=0.5)
 ```
 
 ![Alt text](images/plot8.png)
@@ -150,10 +152,12 @@ plotSurface2dMean(NLmod = NLmod, X=X, C=C, j1=4, j2=5,
                   gridLength_j1=40, gridLength_j2 = 40,
                   quantile_rest = 0.5, xlab='X4', ylab='X5',
                   main="Posterior mean")
+points(X[,4], X[,5], pch=16, cex=0.5)
 plotSurface2dSD(NLmod = NLmod, X=X, C=C, j1=4, j2=5,
                 gridLength_j1=40, gridLength_j2 = 40,
                 quantile_rest = 0.5, xlab='X4', ylab='X5',
                 main="Posterior SD")
+points(X[,4], X[,5], pch=16, cex=0.5)
 ```
 
 ![Alt text](images/plot9.png)
@@ -178,4 +182,4 @@ points(X[,4], X[,5], pch=16, cex=0.5)
 
 **References**
 
-Joseph Antonelli, Maitreyi Mazumdar, David Bellinger, David C. Christiani, Robert Wright, Brent A. Coull. **Bayesian variable selection for multi-dimensional semiparametric regression models**. 2018. arXiv:1711.11239
+Joseph Antonelli, Maitreyi Mazumdar, David Bellinger, David C. Christiani, Robert Wright, Brent A. Coull. **Estimating the health effects of environmental mixtures using Bayesian semiparametric regression and sparsity inducing priors**. 2019. The Annals of Applied Statistics. To appear.
