@@ -41,8 +41,8 @@ So we've generated p=10 exposures that are of interest for this software, one ad
 Now we will build our model. The first thing to note is that the number of degrees of freedom of the splines in the model is very important and therefore the model should be built for a few different values of the degrees of freedom and then the WAIC can be used to evaluate which model to proceed with. Here we will choose 2 and 3 degrees of freedom. Degrees of freedom is controlled by the ns parameter in the model. We also must select the number of MCMC iterations we want (nIter), the number to throw out with the burn-in (nBurn), how many samples to thin (thin), and how many chains to run (nChains). Other parameters that control things such as the hyperparameters of the prior distributions in the model can be changed as well, but we recommend using the pre-set values unless their is strong prior information and the user fully understands the prior distributions.
 
 ```
-NLmod2 = NLint(Y=Y, X=X, C=C, nIter=1000, nBurn=500, thin=2, nChains=2, ns=2)
-NLmod3 = NLint(Y=Y, X=X, C=C, nIter=1000, nBurn=500, thin=2, nChains=2, ns=3)
+NLmod2 = NLint(Y=Y, X=X, C=C, nIter=10000, nBurn=5000, thin=5, nChains=2, ns=2)
+NLmod3 = NLint(Y=Y, X=X, C=C, nIter=10000, nBurn=5000, thin=5, nChains=2, ns=3)
 ```
 
 So we can now evaluate the WAIC of each model
