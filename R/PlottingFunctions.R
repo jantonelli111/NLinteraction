@@ -4,6 +4,9 @@
 #' and plots the two-way interaction matrix
 #'
 #' @param NLmod              The fitted model
+#' @param userLabels         True or false indicating whether the user will specify labels. Default is FALSE
+#' @param xLabels            A p-dimensional vector of labels for the X axis. This will only get used if userLabels=TRUE
+#' @param yLabels            A p-dimensional vector of labels for the Y axis. This will only get used if userLabels=TRUE
 #' 
 #' @export
 #' @examples
@@ -28,22 +31,41 @@
 #' 
 #' plotInt(NLmod = NLmod)
 
-plotInt = function(NLmod) {
+plotInt = function(NLmod, userLabels = FALSE, 
+                   xLabels = NULL, yLabels = NULL) {
   p = dim(NLmod$posterior$zeta)[3]
-  mat = matrix(NLmod$InteractionPIP, nrow=p, ncol=p,
-               dimnames = list(paste("X", 1:p, sep=''), paste("X", 1:p, sep='')))
-  mat.melted = reshape2::melt(mat)
   
-  g = ggplot2::ggplot(mat.melted, ggplot2::aes(x = Var1, y = Var2, fill = value)) + 
-    ggplot2::geom_tile() + ggplot2::coord_equal() +
-    ggplot2::ylab("") + ggplot2::xlab("") + 
-    ggplot2::ggtitle("Posterior inclusion probabilities") +
-    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
-    ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5, face="bold")) + 
-    ggplot2::theme(legend.key.size = ggplot2::unit(1.2, "cm")) +
-    ggplot2::theme(legend.text = ggplot2::element_text(size = 15)) + 
-    ggplot2::theme(legend.title=ggplot2::element_text(size=15, face="bold")) + 
-    ggplot2::theme(axis.text = ggplot2::element_text(size=14))
+  if (userLabels) {
+    mat = matrix(NLmod$InteractionPIP, nrow=p, ncol=p,
+                 dimnames = list(xLabels, yLabels))
+    mat.melted = reshape2::melt(mat)
+    
+    g = ggplot2::ggplot(mat.melted, ggplot2::aes(x = Var1, y = Var2, fill = value)) + 
+      ggplot2::geom_tile() + ggplot2::coord_equal() +
+      ggplot2::ylab("") + ggplot2::xlab("") + 
+      ggplot2::ggtitle("Posterior inclusion probabilities") +
+      ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
+      ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5, face="bold")) + 
+      ggplot2::theme(legend.key.size = ggplot2::unit(1.2, "cm")) +
+      ggplot2::theme(legend.text = ggplot2::element_text(size = 15)) + 
+      ggplot2::theme(legend.title=ggplot2::element_text(size=15, face="bold")) + 
+      ggplot2::theme(axis.text = ggplot2::element_text(size=14))
+  } else {
+    mat = matrix(NLmod$InteractionPIP, nrow=p, ncol=p,
+                 dimnames = list(paste("X", 1:p, sep=''), paste("X", 1:p, sep='')))
+    mat.melted = reshape2::melt(mat)
+    
+    g = ggplot2::ggplot(mat.melted, ggplot2::aes(x = Var1, y = Var2, fill = value)) + 
+      ggplot2::geom_tile() + ggplot2::coord_equal() +
+      ggplot2::ylab("") + ggplot2::xlab("") + 
+      ggplot2::ggtitle("Posterior inclusion probabilities") +
+      ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1)) +
+      ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5, face="bold")) + 
+      ggplot2::theme(legend.key.size = ggplot2::unit(1.2, "cm")) +
+      ggplot2::theme(legend.text = ggplot2::element_text(size = 15)) + 
+      ggplot2::theme(legend.title=ggplot2::element_text(size=15, face="bold")) + 
+      ggplot2::theme(axis.text = ggplot2::element_text(size=14))
+  }
   
   return(g)
 }
@@ -99,6 +121,7 @@ plotInt = function(NLmod) {
 
 plotSurface1d = function(NLmod, X, C, j1, j2, gridLength = 100, 
                          quantile_j2, quantile_rest = 0.5,...) {
+  n = dim(X)[1]
   ns = NLmod$ns
   k = NLmod$k
   p = dim(X)[2]
@@ -194,6 +217,7 @@ plotSurface1d = function(NLmod, X, C, j1, j2, gridLength = 100,
 plotSurface2d = function(NLmod, X, C, j1, j2, gridLength_j1 = 20,
                          gridLength_j2 = 20, minDist=Inf,
                          quantile_rest = 0.5,...) {
+  n = dim(X)[1]
   ns = NLmod$ns
   k = NLmod$k
   p = dim(X)[2]
@@ -292,6 +316,7 @@ plotSurface2d = function(NLmod, X, C, j1, j2, gridLength_j1 = 20,
 plotSurface2dMean = function(NLmod, X, C, j1, j2, gridLength_j1 = 20,
                          gridLength_j2 = 20, minDist=Inf,
                          quantile_rest = 0.5,...) {
+  n = dim(X)[1]
   ns = NLmod$ns
   k = NLmod$k
   p = dim(X)[2]
@@ -391,6 +416,7 @@ plotSurface2dMean = function(NLmod, X, C, j1, j2, gridLength_j1 = 20,
 plotSurface2dSD = function(NLmod, X, C, j1, j2, gridLength_j1 = 20,
                          gridLength_j2 = 20, minDist=Inf,
                          quantile_rest = 0.5,...) {
+  n = dim(X)[1]
   ns = NLmod$ns
   k = NLmod$k
   p = dim(X)[2]

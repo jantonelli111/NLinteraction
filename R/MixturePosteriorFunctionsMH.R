@@ -298,6 +298,7 @@ PlotInteractionHeatmapMeanSD_MH = function(j1, j2, grid_j1, grid_j2, Xstar, X, C
                                         ns, p, zetaPost, betaList, minDist=Inf,
                                         betaCPost, totalScans, nChains, k,...) {
   
+  n = dim(X)[1]
   if (is.null(C)) {
     pc = 0
     NewDesignC = matrix(NA, length(grid_j1)*length(grid_j2), pc+1)
@@ -364,6 +365,7 @@ PlotInteractionHeatmapMean_MH = function(j1, j2, grid_j1, grid_j2, Xstar, X, C, 
                                       ns, p, zetaPost, betaList, minDist=Inf,
                                       betaCPost, totalScans, nChains, k,...) {
   
+  n = dim(X)[1]
   if (is.null(C)) {
     pc = 0
     NewDesignC = matrix(NA, length(grid_j1)*length(grid_j2), pc+1)
@@ -428,6 +430,7 @@ PlotInteractionHeatmapSD_MH = function(j1, j2, grid_j1, grid_j2, Xstar, X, C, qu
                                     ns, p, zetaPost, betaList, minDist=Inf,
                                     betaCPost, totalScans, nChains, k,...) {
   
+  n = dim(X)[1]
   if (is.null(C)) {
     pc = 0
     NewDesignC = matrix(NA, length(grid_j1)*length(grid_j2), pc+1)

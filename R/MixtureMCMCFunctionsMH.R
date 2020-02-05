@@ -430,6 +430,8 @@ modelToZeta_MH = function(model, k) {
 zetaPosterior_MH = function(Y, zeta, model, f_jhi_nc, betaC, sigmaP, tau,
                          k, sigB, Xstar, designC, ns, intMax) {
   
+  n = length(Y)
+  
   PZ = -Inf
   tempY = Y - (designC %*% betaC)
   
@@ -536,6 +538,8 @@ zetaPosterior_MH = function(Y, zeta, model, f_jhi_nc, betaC, sigmaP, tau,
 
 updateBetaOne_MH = function(Y, zeta, f_jhi_nc, betaC, sigmaP, tau,
                          k, sigB, Xstar, designC, ns, intMax) {
+  
+  n = dim(designC)[1]
   
   beta = c(0)
   
@@ -652,6 +656,8 @@ updateBetaOne_MH = function(Y, zeta, f_jhi_nc, betaC, sigmaP, tau,
 
 updateBetaTwo_MH = function(Y, zeta, f_jhi_nc, betaC, sigmaP, tau,
                          k, sigB, Xstar, designC, ns, intMax) {
+  
+  n = dim(designC)[1]
   
   beta = c(0)
   
