@@ -45,6 +45,12 @@ NLmod2 = NLint(Y=Y, X=X, C=C, nIter=10000, nBurn=5000, thin=5, nChains=2, ns=2)
 NLmod3 = NLint(Y=Y, X=X, C=C, nIter=10000, nBurn=5000, thin=5, nChains=2, ns=3)
 ```
 
+Note that if your C or X variables are data frames, then you might need to run the following:
+
+```
+NLmod2 = NLint(Y=Y, X=as.matrix(X), C=as.matrix(C), nIter=10000, nBurn=5000, thin=5, nChains=2, ns=2)
+```
+
 So we can now evaluate the WAIC of each model
 
 ```
@@ -52,7 +58,7 @@ print(c(NLmod2$waic,NLmod3$waic))
 ```
 ![Alt text](images/plot1.png)
 
-And we see that the 2 degree of freedom model is preferred so we will continue with inference using that model. Let's call this model NLmod
+And we see that the 2 degree of freedom model is preferred so we will continue with inference using that model. We recommend comparing models with degrees of freedom between 1 and 5, but for ease of illustration here we just compared 2 and 3. Let's call the chosen model NLmod
 
 ```
 NLmod = NLmod2
