@@ -48,7 +48,8 @@ NLmod3 = NLint(Y=Y, X=X, C=C, nIter=10000, nBurn=5000, thin=5, nChains=2, ns=3)
 Note that if your C or X variables are data frames, then you might need to run the following:
 
 ```
-NLmod2 = NLint(Y=Y, X=as.matrix(X), C=as.matrix(C), nIter=10000, nBurn=5000, thin=5, nChains=2, ns=2)
+NLmod2 = NLint(Y=Y, X=as.matrix(X), C=as.matrix(C), 
+               nIter=10000, nBurn=5000, thin=5, nChains=2, ns=2)
 ```
 
 So we can now evaluate the WAIC of each model
